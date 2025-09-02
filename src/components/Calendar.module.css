@@ -1,0 +1,314 @@
+/* Calendar Component Styles */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.yearNavigation {
+  background: #E6EAFF;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.yearNavigationContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.yearTitle {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.currentYearButton {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #1d4ed8;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.currentYearButton:hover {
+  color: #1e3a8a;
+}
+
+.navButton {
+  padding: 0.75rem;
+  border-radius: 9999px;
+  transition: all 0.15s ease-in-out;
+  color: #1e3a8a;
+}
+
+.navButton:hover {
+  background-color: #dbeafe;
+  color: #1e3a8a;
+}
+
+.monthsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .monthsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .monthsGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.monthCard {
+  background: #E6EAFF;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  cursor: pointer;
+  transform: scale(1);
+  transition: all 0.3s ease-out;
+  border: 2px solid transparent;
+}
+
+.monthCard:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: scale(1.05);
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.monthCardContent {
+  text-align: center;
+}
+
+.monthTitle {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 0.75rem;
+  transition: color 0.15s ease-in-out;
+}
+
+.monthCard:hover .monthTitle {
+  color: #1e40af;
+}
+
+.monthStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lessonCount {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #1d4ed8;
+}
+
+.visualIndicator {
+  display: flex;
+  justify-content: center;
+}
+
+.indicatorDot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease-in-out;
+}
+
+.indicatorDotActive {
+  background-color: #2563eb;
+  transform: scale(1);
+}
+
+.indicatorDotInactive {
+  background-color: #93c5fd;
+  transform: scale(0.75);
+}
+
+.hoverText {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #2563eb;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.monthCard:hover .hoverText {
+  opacity: 1;
+}
+
+/* Expanded Month View */
+.expandedOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 40;
+}
+
+.expandedContainer {
+  background: #E6EAFF;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 56rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  transform: scale(1);
+  transition: all 0.5s ease-out;
+}
+
+.expandedHeader {
+  background: #030460;
+  color: white;
+  padding: 1.5rem;
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+.expandedHeaderContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.expandedTitle {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+}
+
+.expandedSubtitle {
+  color: #bfdbfe;
+  margin-top: 0.25rem;
+}
+
+.closeButton {
+  color: white;
+  transition: all 0.15s ease-in-out;
+  padding: 0.75rem;
+  border-radius: 9999px;
+}
+
+.closeButton:hover {
+  color: #bfdbfe;
+  background-color: #1e40af;
+}
+
+.calendarContent {
+  padding: 1.5rem;
+}
+
+.weekDaysHeader {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.weekDay {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: #1e40af;
+  padding: 0.5rem 0;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  padding: 0.5rem;
+  border: 1px solid #93c5fd;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.calendarDay:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+.calendarDayCurrentMonth {
+  background: #E6EAFF;
+}
+
+.calendarDayOtherMonth {
+  background: #F0F4FF;
+  opacity: 0.6;
+}
+
+.calendarDayToday {
+  box-shadow: 0 0 0 2px #2563eb;
+  box-shadow-opacity: 0.5;
+  background-color: #dbeafe;
+}
+
+.calendarDayWithLessons {
+  background: #D1D9FF;
+  border-color: #60a5fa;
+}
+
+.dayNumber {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+
+.dayNumberCurrentMonth {
+  color: #1e3a8a;
+}
+
+.dayNumberOtherMonth {
+  color: #3b82f6;
+}
+
+.dayNumberToday {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+.lessonIndicator {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  background-color: #93c5fd;
+  color: #1e3a8a;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moreLessonsText {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #1d4ed8;
+  text-align: center;
+}

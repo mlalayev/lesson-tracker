@@ -1,0 +1,258 @@
+/* LessonModal Component Styles */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.container {
+  background: #E6EAFF;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 42rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(1);
+  transition: all 0.3s ease-in-out;
+}
+
+.header {
+  background: #030460;
+  color: white;
+  padding: 1.5rem;
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #bfdbfe;
+  margin-top: 0.25rem;
+}
+
+.closeButton {
+  color: white;
+  transition: all 0.15s ease-in-out;
+  padding: 0.5rem;
+  border-radius: 9999px;
+}
+
+.closeButton:hover {
+  color: #bfdbfe;
+  background-color: #1e40af;
+}
+
+.content {
+  padding: 1.5rem;
+}
+
+.existingLessonsSection {
+  margin-bottom: 1.5rem;
+}
+
+.existingLessonsTitle {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.titleIndicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #2563eb;
+  border-radius: 9999px;
+}
+
+.existingLessonsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.existingLessonItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #dbeafe;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #93c5fd;
+  transition: all 0.15s ease-in-out;
+}
+
+.existingLessonItem:hover {
+  background-color: #bfdbfe;
+}
+
+.lessonInfo {
+  flex: 1;
+}
+
+.lessonTitle {
+  font-weight: 500;
+  color: #1e3a8a;
+}
+
+.lessonDetails {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #1d4ed8;
+}
+
+.lessonNotes {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #2563eb;
+  margin-top: 0.25rem;
+}
+
+.deleteButton {
+  color: #dc2626;
+  transition: all 0.15s ease-in-out;
+  padding: 0.5rem;
+  border-radius: 9999px;
+}
+
+.deleteButton:hover {
+  color: #b91c1c;
+  background-color: #fef2f2;
+}
+
+/* Form Styles */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .formRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: #1e40af;
+  margin-bottom: 0.5rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #93c5fd;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2563eb;
+  border-color: transparent;
+}
+
+.select {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #93c5fd;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2563eb;
+  border-color: transparent;
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #93c5fd;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease-in-out;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2563eb;
+  border-color: transparent;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+
+.submitButton {
+  background: #030460;
+  flex: 1;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.submitButton:hover {
+  background-color: #1e40af;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.submitButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2563eb, 0 0 0 4px white;
+}
+
+.cancelButton {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+
+.cancelButton:hover {
+  background-color: #eff6ff;
+}
