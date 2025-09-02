@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Lesson } from '@/types/lesson';
 import styles from './Calendar.module.css';
 
@@ -13,6 +13,9 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [expandedPosition, setExpandedPosition] = useState({ top: 0, left: 0, width: 0, height: 0 });
+  const monthRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const months = [
     'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
@@ -57,13 +60,32 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
   };
 
   const handleMonthClick = (monthIndex: number) => {
-    setSelectedMonth(monthIndex);
-    setIsExpanded(true);
+    const monthElement = monthRefs.current[monthIndex];
+    if (monthElement) {
+      const rect = monthElement.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      
+      setExpandedPosition({
+        top: rect.top + scrollTop,
+        left: rect.left + scrollLeft,
+        width: rect.width,
+        height: rect.height
+      });
+      
+      setSelectedMonth(monthIndex);
+      setIsExpanded(true);
+      setIsClosing(false);
+    }
   };
 
   const handleCloseMonth = () => {
-    setIsExpanded(false);
-    setTimeout(() => setSelectedMonth(null), 300);
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsExpanded(false);
+      setIsClosing(false);
+      setSelectedMonth(null);
+    }, 1200);
   };
 
   const goToPreviousYear = () => {
@@ -84,7 +106,23 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
     
     return (
       <div className={styles.expandedOverlay}>
-        <div className={styles.expandedContainer}>
+        <div 
+          className={styles.expandedContainer}
+          style={{
+            position: 'fixed',
+            top: expandedPosition.top,
+            left: expandedPosition.left,
+            width: expandedPosition.width,
+            height: expandedPosition.height,
+            transform: 'translate(-50%, -50%)',
+            zIndex: 50,
+            '--start-top': `${expandedPosition.top}px`,
+            '--start-left': `${expandedPosition.left}px`,
+            '--start-width': `${expandedPosition.width}px`,
+            '--start-height': `${expandedPosition.height}px`,
+            animation: isClosing ? `${styles.closeAnimation} 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards` : `${styles.expandAnimation} 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+          } as any}
+        >
           {/* Header */}
           <div className={styles.expandedHeader}>
             <div className={styles.expandedHeaderContent}>
@@ -219,6 +257,7 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
           return (
             <div
               key={monthIndex}
+              ref={(el) => { monthRefs.current[monthIndex] = el; }}
               onClick={() => handleMonthClick(monthIndex)}
               className={styles.monthCard}
             >

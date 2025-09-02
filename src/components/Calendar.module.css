@@ -175,6 +175,70 @@
   transition: all 0.5s ease-out;
 }
 
+/* Expand Animation */
+@keyframes expandAnimation {
+  0% {
+    top: var(--start-top);
+    left: var(--start-left);
+    width: var(--start-width);
+    height: var(--start-height);
+    transform: translate(-50%, -50%) scale(1);
+    border-radius: 1rem;
+  }
+  50% {
+    top: 50%;
+    left: 50%;
+    width: var(--start-width);
+    height: var(--start-height);
+    transform: translate(-50%, -50%) scale(1);
+    border-radius: 1rem;
+  }
+  100% {
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 90vh;
+    transform: translate(-50%, -50%) scale(1);
+    border-radius: 1.5rem;
+  }
+}
+
+/* Close Animation */
+@keyframes closeAnimation {
+  0% {
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 90vh;
+    transform: translate(-50%, -50%) scale(1);
+    border-radius: 1.5rem;
+  }
+  50% {
+    top: 50%;
+    left: 50%;
+    width: var(--start-width);
+    height: var(--start-height);
+    transform: translate(-50%, -50%) scale(1);
+    border-radius: 1rem;
+  }
+  100% {
+    top: var(--start-top);
+    left: var(--start-left);
+    width: var(--start-width);
+    height: var(--start-height);
+    transform: translate(-50%, -50%) scale(1);
+    border-radius: 1rem;
+  }
+}
+
+.expandAnimation {
+  animation: expandAnimation 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.closeAnimation {
+  animation: closeAnimation 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 .expandedHeader {
   background: #030460;
   color: white;
