@@ -14,6 +14,7 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showContent, setShowContent] = useState(false);
   const [expandedPosition, setExpandedPosition] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const monthRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -76,11 +77,18 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
       setSelectedMonth(monthIndex);
       setIsExpanded(true);
       setIsClosing(false);
+      setShowContent(false);
+      
+      // Content-i 0.6s sonra göstər (div ortaya çatdıqdan sonra)
+      setTimeout(() => {
+        setShowContent(true);
+      }, 600);
     }
   };
 
   const handleCloseMonth = () => {
     setIsClosing(true);
+    setShowContent(false);
     setTimeout(() => {
       setIsExpanded(false);
       setIsClosing(false);
@@ -120,11 +128,11 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
             '--start-left': `${expandedPosition.left}px`,
             '--start-width': `${expandedPosition.width}px`,
             '--start-height': `${expandedPosition.height}px`,
-            animation: isClosing ? `${styles.closeAnimation} 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards` : `${styles.expandAnimation} 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+            animation: isClosing ? `${styles.closeAnimation} 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards` : `${styles.expandAnimation} 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards`
           } as any}
         >
           {/* Header */}
-          <div className={styles.expandedHeader}>
+          <div className={styles.expandedHeader} style={{ opacity: showContent ? 1 : 0 }}>
             <div className={styles.expandedHeaderContent}>
               <div>
                 <h2 className={styles.expandedTitle}>{months[selectedMonth]} {currentYear}</h2>
@@ -142,7 +150,7 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
           </div>
 
           {/* Calendar Content */}
-          <div className={styles.calendarContent}>
+          <div className={styles.calendarContent} style={{ opacity: showContent ? 1 : 0 }}>
             {/* Week days header */}
             <div className={styles.weekDaysHeader}>
               {weekDays.map((day, index) => (

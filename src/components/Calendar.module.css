@@ -161,18 +161,8 @@
   justify-content: center;
   padding: 1rem;
   z-index: 40;
-}
-
-.expandedContainer {
-  background: #E6EAFF;
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  max-width: 56rem;
-  width: 100%;
-  max-height: 90vh;
   overflow: hidden;
-  transform: scale(1);
-  transition: all 0.5s ease-out;
+
 }
 
 /* Expand Animation */
@@ -184,6 +174,7 @@
     height: var(--start-height);
     transform: translate(-50%, -50%) scale(1);
     border-radius: 1rem;
+    overflow: hidden;
   }
   50% {
     top: 50%;
@@ -192,6 +183,7 @@
     height: var(--start-height);
     transform: translate(-50%, -50%) scale(1);
     border-radius: 1rem;
+    overflow: hidden;
   }
   100% {
     top: 50%;
@@ -200,6 +192,7 @@
     height: 90vh;
     transform: translate(-50%, -50%) scale(1);
     border-radius: 1.5rem;
+    overflow: visible;
   }
 }
 
@@ -212,6 +205,7 @@
     height: 90vh;
     transform: translate(-50%, -50%) scale(1);
     border-radius: 1.5rem;
+    overflow: visible;
   }
   50% {
     top: 50%;
@@ -220,6 +214,7 @@
     height: var(--start-height);
     transform: translate(-50%, -50%) scale(1);
     border-radius: 1rem;
+    overflow: hidden;
   }
   100% {
     top: var(--start-top);
@@ -228,6 +223,7 @@
     height: var(--start-height);
     transform: translate(-50%, -50%) scale(1);
     border-radius: 1rem;
+    overflow: hidden;
   }
 }
 
@@ -239,11 +235,45 @@
   animation: closeAnimation 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Content Animation */
+.expandedContainer {
+  background: #E6EAFF;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 56rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  transform: scale(1);
+  transition: all 0.5s ease-out;
+}
+
 .expandedHeader {
   background: #030460;
   color: white;
   padding: 1.5rem;
   border-radius: 1.5rem 1.5rem 0 0;
+  opacity: 0;
+  animation: fadeInContent 0.3s ease-out 0.6s forwards;
+}
+
+.calendarContent {
+  padding: 1.5rem;
+  opacity: 0;
+  animation: fadeInContent 0.3s ease-out 0.9s forwards;
+  overflow: hidden; /* prevent days from spilling out */
+  max-height: calc(90vh - 140px); /* header + paddings */
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .expandedHeaderContent {
@@ -275,10 +305,6 @@
   background-color: #1e40af;
 }
 
-.calendarContent {
-  padding: 1.5rem;
-}
-
 .weekDaysHeader {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -295,10 +321,12 @@
   padding: 0.5rem 0;
 }
 
+/* Ensure the grid itself clips its children */
 .calendarGrid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.5rem;
+  overflow: hidden;
 }
 
 .calendarDay {
