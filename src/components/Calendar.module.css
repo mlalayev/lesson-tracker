@@ -7,10 +7,11 @@
 }
 
 .yearNavigation {
-  background: #E6EAFF;
+  background: #e6eaff;
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .yearNavigationContent {
@@ -70,9 +71,10 @@
 }
 
 .monthCard {
-  background: #E6EAFF;
+  background: #e6eaff;
   border-radius: 1rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
   cursor: pointer;
   transform: scale(1);
@@ -81,7 +83,8 @@
 }
 
 .monthCard:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   transform: scale(1.05);
   background-color: #dbeafe;
   border-color: #93c5fd;
@@ -162,17 +165,31 @@
   padding: 1rem;
   z-index: 40;
   overflow: hidden;
-
 }
 
-/* Expand Animation */
+/* Smoother animation performance hints */
+.expandedContainer {
+  background: #e6eaff;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 56rem;
+  width: 100%;
+  max-height: 90vh;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  will-change: top, left, width, height, transform;
+  transition: box-shadow 200ms ease-out;
+  overflow: hidden;
+}
+
+/* Expand Animation - move to center only (no resize yet) */
 @keyframes expandAnimation {
   0% {
     top: var(--start-top);
     left: var(--start-left);
     width: var(--start-width);
     height: var(--start-height);
-    transform: translate(-50%, -50%) scale(1);
+    transform: none; /* start exactly where it is */
     border-radius: 1rem;
     overflow: hidden;
   }
@@ -181,94 +198,133 @@
     left: 50%;
     width: var(--start-width);
     height: var(--start-height);
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%); /* center alignment kicks in at center */
     border-radius: 1rem;
     overflow: hidden;
   }
   100% {
     top: 50%;
     left: 50%;
-    width: 100%;
-    height: 90vh;
-    transform: translate(-50%, -50%) scale(1);
-    border-radius: 1.5rem;
-    overflow: visible;
+    width: var(--start-width);
+    height: var(--start-height);
+    transform: translate(-50%, -50%);
+    border-radius: 1rem;
+    overflow: hidden;
   }
 }
 
-/* Close Animation */
+/* Close Animation - center back to grid position (no resize) */
 @keyframes closeAnimation {
   0% {
     top: 50%;
     left: 50%;
-    width: 100%;
-    height: 90vh;
-    transform: translate(-50%, -50%) scale(1);
-    border-radius: 1.5rem;
-    overflow: visible;
+    width: var(--start-width);
+    height: var(--start-height);
+    transform: translate(-50%, -50%); /* start centered */
+    border-radius: 1rem;
+    overflow: hidden;
   }
   50% {
     top: 50%;
     left: 50%;
     width: var(--start-width);
     height: var(--start-height);
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%); /* remain centered mid-way */
     border-radius: 1rem;
-    overflow: hidden;
   }
   100% {
     top: var(--start-top);
     left: var(--start-left);
     width: var(--start-width);
     height: var(--start-height);
-    transform: translate(-50%, -50%) scale(1);
+    transform: none; /* end exactly at original cell */
     border-radius: 1rem;
     overflow: hidden;
   }
 }
 
 .expandAnimation {
-  animation: expandAnimation 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: expandAnimation 600ms ease-out forwards;
 }
 
 .closeAnimation {
-  animation: closeAnimation 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: closeAnimation 600ms ease-in forwards;
 }
 
-/* Content Animation */
-.expandedContainer {
-  background: #E6EAFF;
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  max-width: 56rem;
-  width: 100%;
-  max-height: 90vh;
-  overflow: hidden;
-  transform: scale(1);
-  transition: all 0.5s ease-out;
-}
-
+/* Polished header styling - looks good even when compact */
 .expandedHeader {
-  background: #030460;
-  color: white;
-  padding: 1.5rem;
-  border-radius: 1.5rem 1.5rem 0 0;
+  background: linear-gradient(180deg, #0b0f4a 0%, #0a0f6a 100%);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 12px 12px 0 0;
   opacity: 0;
-  animation: fadeInContent 0.3s ease-out 0.6s forwards;
+  animation: fadeInContent 280ms ease-out 380ms forwards;
+  position: relative;
+  min-height: 72px; /* compact height so it reads well when small */
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08);
 }
 
+.expandedHeaderContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.expandedTitle {
+  font-weight: 700;
+  font-size: clamp(18px, 2.4vw, 26px);
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  margin: 0;
+}
+
+.expandedSubtitle {
+  color: rgba(255,255,255,0.8);
+  margin-top: 6px;
+  font-size: clamp(12px, 1.4vw, 14px);
+  line-height: 1.35;
+}
+
+.closeButton {
+  color: #fff;
+  background: rgba(255,255,255,0.08);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  transition: background 150ms ease-out, transform 150ms ease-out, opacity 150ms ease-out;
+}
+
+.closeButton:hover {
+  background: rgba(255,255,255,0.16);
+  transform: scale(1.06);
+}
+
+/* Divider between header and calendar area for compact look */
+.headerDivider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+/* Content */
 .calendarContent {
   padding: 1.5rem;
   opacity: 0;
-  animation: fadeInContent 0.3s ease-out 0.9s forwards;
+  animation: fadeInContent 280ms ease-out 520ms forwards;
   overflow: hidden; /* prevent days from spilling out */
-  max-height: calc(90vh - 140px); /* header + paddings */
+  max-height: calc(90vh - 140px);
 }
 
 @keyframes fadeInContent {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -276,57 +332,25 @@
   }
 }
 
-.expandedHeaderContent {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.expandedTitle {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-  font-weight: 700;
-}
-
-.expandedSubtitle {
-  color: #bfdbfe;
-  margin-top: 0.25rem;
-}
-
-.closeButton {
-  color: white;
-  transition: all 0.15s ease-in-out;
-  padding: 0.75rem;
-  border-radius: 9999px;
-}
-
-.closeButton:hover {
-  color: #bfdbfe;
-  background-color: #1e40af;
-}
-
-.weekDaysHeader {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.weekDay {
-  text-align: center;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 600;
-  color: #1e40af;
-  padding: 0.5rem 0;
-}
-
-/* Ensure the grid itself clips its children */
+/* Grid clipping */
 .calendarGrid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.5rem;
   overflow: hidden;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .expandAnimation,
+  .closeAnimation {
+    animation-duration: 1ms;
+  }
+  .expandedHeader,
+  .calendarContent {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .calendarDay {
@@ -339,17 +363,18 @@
 }
 
 .calendarDay:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-color: #3b82f6;
   transform: scale(1.05);
 }
 
 .calendarDayCurrentMonth {
-  background: #E6EAFF;
+  background: #e6eaff;
 }
 
 .calendarDayOtherMonth {
-  background: #F0F4FF;
+  background: #f0f4ff;
   opacity: 0.6;
 }
 
@@ -360,7 +385,7 @@
 }
 
 .calendarDayWithLessons {
-  background: #D1D9FF;
+  background: #d1d9ff;
   border-color: #60a5fa;
 }
 
