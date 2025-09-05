@@ -52,6 +52,7 @@ export default function Home() {
         <Calendar 
           lessons={lessons}
           onDateClick={handleDateClick}
+          onDeleteLesson={handleDeleteLesson}
         />
         
         {isModalOpen && selectedDate && (
@@ -59,10 +60,8 @@ export default function Home() {
             date={selectedDate}
             onSave={handleSaveLesson}
             onClose={() => setIsModalOpen(false)}
-            existingLessons={lessons.filter(lesson => 
-              lesson.date === selectedDate.toISOString().split('T')[0]
-            )}
-            onDelete={handleDeleteLesson}
+            existingLessons={[]}
+            onDelete={() => {}}
           />
         )}
       </div>

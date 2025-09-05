@@ -94,47 +94,6 @@ export default function LessonModal({
         </div>
 
         <div className={styles.content}>
-          {/* Mövcud dərslər */}
-          {existingLessons.length > 0 && (
-            <div className={styles.existingLessonsSection}>
-              <h3 className={styles.existingLessonsTitle}>
-                <div className={styles.titleIndicator}></div>
-                Bu günün dərsləri:
-              </h3>
-              <div className={styles.existingLessonsList}>
-                {existingLessons.map((lesson) => (
-                  <div
-                    key={lesson.id}
-                    className={styles.existingLessonItem}
-                  >
-                    <div className={styles.lessonInfo}>
-                      <div className={styles.lessonTitle}>
-                        {lesson.time} - {lesson.subject}
-                      </div>
-                      <div className={styles.lessonDetails}>
-                        {lesson.studentName} • {lesson.duration} dəq
-                      </div>
-                      {lesson.notes && (
-                        <div className={styles.lessonNotes}>
-                          {lesson.notes}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => onDelete(lesson.id)}
-                      className={styles.deleteButton}
-                      title="Dərsi sil"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Yeni dərs formu */}
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formRow}>

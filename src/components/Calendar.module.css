@@ -175,6 +175,8 @@
   max-width: 56rem;
   width: 100%;
   max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   transform-origin: center center;
   backface-visibility: hidden;
   will-change: top, left, width, height, transform;
@@ -252,7 +254,7 @@
 }
 
 .expandAnimation {
-  animation: expandAnimation 600ms ease-out forwards;
+  animation: expandAnimation 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .closeAnimation {
@@ -273,15 +275,15 @@
   100% {
     top: 50%;
     left: 50%;
-    width: min(92vw, 56rem);
-    height: min(85vh, 720px);
+    width: min(96vw, 72rem);
+    height: min(90vh, 820px);
     transform: translate(-50%, -50%);
     border-radius: 12px;
   }
 }
 
 .growAnimation {
-  animation: growAnimation 520ms ease-out forwards;
+  animation: growAnimation 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Polished header styling - looks good even when compact */
@@ -291,7 +293,7 @@
   padding: 16px 20px;
   border-radius: 12px 12px 0 0;
   opacity: 0;
-  animation: fadeInContent 280ms ease-out 520ms forwards;
+  animation: fadeInContent 280ms ease-out 600ms forwards;
   position: relative;
   min-height: 80px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -352,14 +354,15 @@
 
 /* Content */
 .calendarContent {
-  padding: 20px;
+  padding: 16px;
   opacity: 0;
-  animation: fadeInContent 280ms ease-out 520ms forwards;
-  overflow: hidden; /* prevent days from spilling out */
-  max-height: calc(90vh - 200px);
+  animation: fadeInContent 280ms ease-out 600ms forwards;
   background: #f8faff;
   border-radius: 0 0 12px 12px;
   margin-top: 0;
+  flex: 1 1 auto;
+  min-height: 0; /* allow grid to shrink inside */
+  overflow: hidden; /* prevent outer scrollbars while grid fits inside */
 }
 
 @keyframes fadeInContent {
@@ -377,8 +380,8 @@
 .weekDaysHeader {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.2rem;
+  margin-bottom: 0.4rem;
   padding: 0 4px;
 }
 
@@ -397,8 +400,9 @@
 .calendarGrid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.5rem;
-  overflow: hidden;
+  grid-template-rows: repeat(6, 1fr); /* exactly 6 rows */
+  gap: 0.2rem;
+  height: 91%;
 }
 
 /* Reduced motion preference */
@@ -415,10 +419,10 @@
 }
 
 .calendarDay {
-  aspect-ratio: 1;
-  padding: 8px;
+  /* stretch to row height */
+  padding: 2px;
   border: 1px solid #93c5fd;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   background: #ffffff;
@@ -427,7 +431,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-height: 3.5rem;
+  min-height: 0;
+  height: 100%;
   position: relative;
   overflow: hidden;
 }
@@ -437,6 +442,11 @@
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-color: #3b82f6;
   transform: scale(1.05);
+}
+
+.calendarDay:hover .hoverIcons {
+  opacity: 1;
+  visibility: visible;
 }
 
 .calendarDayCurrentMonth {
@@ -459,12 +469,30 @@
   border-color: #60a5fa;
 }
 
+.calendarDaySalaryPeriod {
+  background: #dbeafe !important;
+  border-color: #2563eb !important;
+  border-width: 2px !important;
+  position: relative;
+}
+
+.calendarDaySalaryPeriod::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: #2563eb;
+  border-radius: 50%;
+}
+
 .dayNumber {
-  font-size: 0.9rem;
-  line-height: 1.25rem;
+  font-size: 0.72rem;
+  line-height: 0.95rem;
   font-weight: 600;
   text-align: center;
-  margin-bottom: 4px;
+  margin-bottom: 1px;
   color: #1e40af;
 }
 
@@ -484,13 +512,13 @@
 }
 
 .lessonIndicator {
-  font-size: 0.7rem;
-  line-height: 1rem;
+  font-size: 0.58rem;
+  line-height: 0.78rem;
   background-color: #2563eb;
   color: #ffffff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-bottom: 2px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin-bottom: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -499,13 +527,58 @@
 }
 
 .moreLessonsText {
-  font-size: 0.7rem;
-  line-height: 1rem;
+  font-size: 0.58rem;
+  line-height: 0.78rem;
   color: #2563eb;
   text-align: center;
   font-weight: 500;
   background: rgba(37, 99, 235, 0.1);
-  padding: 2px 4px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin-top: 1px;
+}
+
+/* Hover Icons */
+.hoverIcons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
   border-radius: 4px;
-  margin-top: 2px;
+}
+
+.hoverIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hoverIcon:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.hoverIcon svg {
+  width: 20px;
+  height: 20px;
 }
