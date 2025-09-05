@@ -162,7 +162,8 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson }: Calen
     const days = getDaysInMonth(currentYear, selectedMonth);
 
     return (
-      <div className={styles.expandedOverlay}>
+      <>
+        <div className={styles.expandedOverlay}>
         {/* Container with two-stage animation */}
         <div
           className={`${styles.expandedContainer} ${
@@ -324,7 +325,20 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson }: Calen
             </div>
           )}
         </div>
-      </div>
+        </div>
+
+        {/* View Lessons Modal - Outside expanded overlay */}
+        {isViewModalOpen && selectedDateForView && (
+          <ViewLessonsModal
+            date={selectedDateForView}
+            lessons={lessons.filter(lesson =>
+              lesson.date === selectedDateForView.toISOString().split('T')[0]
+            )}
+            onClose={handleCloseViewModal}
+            onDelete={onDeleteLesson || (() => {})}
+          />
+        )}
+      </>
     );
   }
 

@@ -25,14 +25,78 @@ export default function Home() {
   };
 
   const handleSaveLesson = (lesson: Lesson) => {
-    const newLessons = [...lessons, lesson];
+    let newLessons = [...lessons];
+    
+    if (lesson.isGroupLesson && lesson.groupDays && lesson.groupDays.length > 0) {
+      // Qrup dərsi üçün avtomatik dərslər yarat
+      const groupId = `group_${Date.now()}`;
+      const baseDate = new Date(lesson.date);
+      const year = baseDate.getFullYear();
+      const month = baseDate.getMonth();
+      
+      // Həmin ayın bütün günlərini yoxla
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const currentDate = new Date(year, month, day);
+        const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay(); // Bazar = 7
+        
+        // Əgər bu gün qrupun gəldiyi günlərdəndirsə
+        if (lesson.groupDays.includes(dayOfWeek)) {
+          const groupLesson: Lesson = {
+            ...lesson,
+            id: `${groupId}_${day}`,
+            date: currentDate.toISOString().split('T')[0],
+            groupId: groupId,
+            isGroupLesson: true
+          };
+          
+          // Əgər bu gün üçün dərs yoxdursa əlavə et
+          const existingLesson = newLessons.find(l => 
+            l.date === groupLesson.date && 
+            l.time === groupLesson.time && 
+            l.studentName === groupLesson.studentName
+          );
+          
+          if (!existingLesson) {
+            newLessons.push(groupLesson);
+          }
+        }
+      }
+    } else {
+      // Adi dərs
+      newLessons.push(lesson);
+    }
+    
     setLessons(newLessons);
     localStorage.setItem('lessons', JSON.stringify(newLessons));
     setIsModalOpen(false);
   };
 
   const handleDeleteLesson = (lessonId: string) => {
-    const newLessons = lessons.filter(lesson => lesson.id !== lessonId);
+    const lessonToDelete = lessons.find(lesson => lesson.id === lessonId);
+    let newLessons = [...lessons];
+    
+    if (lessonToDelete?.isGroupLesson && lessonToDelete.groupId) {
+      // Qrup dərsi silinirsə, yalnız gələcək günlərdə sil
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Günün başlanğıcı
+      
+      newLessons = newLessons.filter(lesson => {
+        if (lesson.groupId === lessonToDelete.groupId) {
+          const lessonDate = new Date(lesson.date);
+          lessonDate.setHours(0, 0, 0, 0);
+          
+          // Əgər dərs tarixi bugündən sonradırsa sil, əks halda qalsın
+          return lessonDate < today;
+        }
+        return true; // Qrup dərsi deyilsə qalsın
+      });
+    } else {
+      // Adi dərs silinirsə
+      newLessons = newLessons.filter(lesson => lesson.id !== lessonId);
+    }
+    
     setLessons(newLessons);
     localStorage.setItem('lessons', JSON.stringify(newLessons));
   };

@@ -224,6 +224,89 @@
   border-color: transparent;
 }
 
+/* Checkbox styles */
+.checkbox {
+  margin-right: 0.5rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: #3b82f6;
+}
+
+.checkboxLabel {
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Group days container */
+.groupDaysContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.groupDayOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.groupDayOption:hover {
+  background-color: #e2e8f0;
+}
+
+.groupDayCheckbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #3b82f6;
+}
+
+.groupDayLabel {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.groupDaysHint {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* Price info styles */
+.priceInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 6px;
+  color: white;
+}
+
+.studentCount {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.calculatedPrice {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .buttonGroup {
   display: flex;
   gap: 0.75rem;

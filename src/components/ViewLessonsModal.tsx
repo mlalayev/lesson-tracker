@@ -1,6 +1,7 @@
 'use client';
 
 import { Lesson } from '@/types/lesson';
+import { calculateStudentCount, calculatePrice } from '@/types/pricing';
 import styles from './ViewLessonsModal.module.css';
 
 interface ViewLessonsModalProps {
@@ -111,7 +112,12 @@ export default function ViewLessonsModal({
                             {getSubjectIcon(lesson.subject)}
                           </span>
                           <div className={styles.subjectDetails}>
-                            <h4 className={styles.subjectName}>{lesson.subject}</h4>
+                            <h4 className={styles.subjectName}>
+                              {lesson.subject}
+                              {lesson.isGroupLesson && (
+                                <span className={styles.groupBadge}>Qrup</span>
+                              )}
+                            </h4>
                             <p className={styles.studentName}>{lesson.studentName}</p>
                           </div>
                         </div>
@@ -149,6 +155,18 @@ export default function ViewLessonsModal({
                           <div className={styles.timeItem}>
                             <span className={styles.timeLabel}>Müddət:</span>
                             <span className={styles.timeValue}>{lesson.duration} dəq</span>
+                          </div>
+                          <div className={styles.timeItem}>
+                            <span className={styles.timeLabel}>Tələbə sayı:</span>
+                            <span className={styles.timeValue}>
+                              {calculateStudentCount(lesson.studentName)} nəfər
+                            </span>
+                          </div>
+                          <div className={styles.timeItem}>
+                            <span className={styles.timeLabel}>Qiymət:</span>
+                            <span className={styles.priceValue}>
+                              {calculatePrice(lesson.subject, calculateStudentCount(lesson.studentName))} manat
+                            </span>
                           </div>
                         </div>
                         

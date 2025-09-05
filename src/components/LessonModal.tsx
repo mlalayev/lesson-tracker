@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lesson } from '@/types/lesson';
+import { calculateStudentCount, calculatePrice } from '@/types/pricing';
 import styles from './LessonModal.module.css';
 
 interface LessonModalProps {
@@ -24,8 +25,13 @@ export default function LessonModal({
     subject: '',
     studentName: '',
     notes: '',
-    duration: 60
+    duration: 60,
+    isGroupLesson: false,
+    groupDays: [] as number[]
   });
+
+  const [calculatedPrice, setCalculatedPrice] = useState(0);
+  const [studentCount, setStudentCount] = useState(0);
 
   const timeSlots = [];
   for (let hour = 8; hour <= 22; hour++) {
@@ -44,6 +50,25 @@ export default function LessonModal({
     'Digər'
   ];
 
+  const weekDays = [
+    { value: 1, label: 'Bazar ertəsi' },
+    { value: 2, label: 'Çərşənbə axşamı' },
+    { value: 3, label: 'Çərşənbə' },
+    { value: 4, label: 'Cümə axşamı' },
+    { value: 5, label: 'Cümə' },
+    { value: 6, label: 'Şənbə' },
+    { value: 7, label: 'Bazar' }
+  ];
+
+  // Qiymət hesablama
+  useEffect(() => {
+    const count = calculateStudentCount(formData.studentName);
+    const price = calculatePrice(formData.subject, count);
+    
+    setStudentCount(count);
+    setCalculatedPrice(price);
+  }, [formData.studentName, formData.subject]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -56,10 +81,19 @@ export default function LessonModal({
     onSave(newLesson);
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleGroupDayToggle = (dayValue: number) => {
+    setFormData(prev => ({
+      ...prev,
+      groupDays: prev.groupDays.includes(dayValue)
+        ? prev.groupDays.filter(day => day !== dayValue)
+        : [...prev.groupDays, dayValue]
     }));
   };
 
@@ -166,9 +200,19 @@ export default function LessonModal({
                 value={formData.studentName}
                 onChange={(e) => handleInputChange('studentName', e.target.value)}
                 className={styles.input}
-                placeholder="Tələbənin adını yazın"
+                placeholder="Tələbə adlarını vergüllə ayırın (məs: Əli, Ayşə, Məmməd)"
                 required
               />
+              {studentCount > 0 && (
+                <div className={styles.priceInfo}>
+                  <span className={styles.studentCount}>
+                    {studentCount} tələbə
+                  </span>
+                  <span className={styles.calculatedPrice}>
+                    {calculatedPrice} manat
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Qeydlər */}
@@ -184,6 +228,44 @@ export default function LessonModal({
                 rows={3}
               />
             </div>
+
+            {/* Qrup Dərsi */}
+            <div className={styles.formField}>
+              <label className={styles.label}>
+                <input
+                  type="checkbox"
+                  checked={formData.isGroupLesson}
+                  onChange={(e) => handleInputChange('isGroupLesson', e.target.checked)}
+                  className={styles.checkbox}
+                />
+                <span className={styles.checkboxLabel}>Qrup dərsi (həftədə 3 dəfə)</span>
+              </label>
+            </div>
+
+            {/* Qrup Günləri */}
+            {formData.isGroupLesson && (
+              <div className={styles.formField}>
+                <label className={styles.label}>
+                  Qrupun gəldiyi günlər:
+                </label>
+                <div className={styles.groupDaysContainer}>
+                  {weekDays.map((day) => (
+                    <label key={day.value} className={styles.groupDayOption}>
+                      <input
+                        type="checkbox"
+                        checked={formData.groupDays.includes(day.value)}
+                        onChange={() => handleGroupDayToggle(day.value)}
+                        className={styles.groupDayCheckbox}
+                      />
+                      <span className={styles.groupDayLabel}>{day.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className={styles.groupDaysHint}>
+                  Qrup dərsi seçsəniz, həmin ayın bütün seçilmiş günlərində avtomatik dərs yaradılacaq.
+                </p>
+              </div>
+            )}
 
             {/* Düymələr */}
             <div className={styles.buttonGroup}>
