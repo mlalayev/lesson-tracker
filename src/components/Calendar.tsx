@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Lesson } from "@/types/lesson";
+import { calculatePrice, calculateStudentCount } from "@/types/pricing";
 import styles from "./Calendar.module.css";
 import ViewLessonsModal from "./ViewLessonsModal";
 
@@ -9,9 +10,12 @@ interface CalendarProps {
   lessons: Lesson[];
   onDateClick: (date: Date) => void;
   onDeleteLesson?: (lessonId: string) => void;
+  onClearMonth?: (year: number, month: number, startDate?: Date, endDate?: Date) => void;
+  onCopyTemplate?: (type: 'odd' | 'even', year: number, month: number) => void;
+  onOpenTemplate?: (type: 'odd' | 'even', year: number) => void;
 }
 
-export default function Calendar({ lessons, onDateClick, onDeleteLesson }: CalendarProps) {
+export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClearMonth, onCopyTemplate, onOpenTemplate }: CalendarProps) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -43,12 +47,12 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson }: Calen
     "Dekabr",
   ];
 
-  const weekDays = ["B", "B", "Ç", "Ç", "C", "C", "Ş"];
+  const weekDays = ["S", "M", "T", "W", "Th", "Fr", "Sa"];
 
   const getDaysInMonth = (year: number, month: number) => {
-    // Maaş dövrü: ayın 5-indən növbəti ayın 4-nə qədər
-    const salaryStartDate = new Date(year, month, 5);
-    const salaryEndDate = new Date(year, month + 1, 4);
+    // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
+    const salaryStartDate = new Date(year, month, 6);
+    const salaryEndDate = new Date(year, month + 1, 5);
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -155,6 +159,59 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson }: Calen
 
   const goToCurrentYear = () => {
     setCurrentYear(new Date().getFullYear());
+  };
+
+  const calculateMonthlySalary = (monthIndex: number) => {
+    // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
+    const salaryStartDate = new Date(currentYear, monthIndex, 6);
+    const salaryEndDate = new Date(currentYear, monthIndex + 1, 5);
+    
+    const monthLessons = lessons.filter((lesson) => {
+      const lessonDate = new Date(lesson.date);
+      return lessonDate >= salaryStartDate && lessonDate <= salaryEndDate;
+    });
+
+    let totalSalary = 0;
+    
+    monthLessons.forEach((lesson) => {
+      const studentCount = calculateStudentCount(lesson.studentName);
+      const lessonPrice = calculatePrice(lesson.subject, studentCount);
+      totalSalary += lessonPrice;
+    });
+
+    const startDateStr = `${salaryStartDate.getDate()}.${(salaryStartDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    const endDateStr = `${salaryEndDate.getDate()}.${(salaryEndDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    
+    alert(`${months[monthIndex]} ${currentYear} maaşı\n(${startDateStr} - ${endDateStr})\n\nÜmumi maaş: ${totalSalary} AZN\nDərs sayı: ${monthLessons.length}`);
+  };
+
+  const clearMonth = (monthIndex: number) => {
+    // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
+    const salaryStartDate = new Date(currentYear, monthIndex, 6);
+    const salaryEndDate = new Date(currentYear, monthIndex + 1, 5);
+    
+    const monthLessons = lessons.filter((lesson) => {
+      const lessonDate = new Date(lesson.date);
+      return lessonDate >= salaryStartDate && lessonDate <= salaryEndDate;
+    });
+
+    if (monthLessons.length === 0) {
+      const startDateStr = `${salaryStartDate.getDate()}.${(salaryStartDate.getMonth() + 1).toString().padStart(2, '0')}`;
+      const endDateStr = `${salaryEndDate.getDate()}.${(salaryEndDate.getMonth() + 1).toString().padStart(2, '0')}`;
+      alert(`${months[monthIndex]} maaş dövründə (${startDateStr} - ${endDateStr}) silinəcək dərs yoxdur.`);
+      return;
+    }
+
+    const startDateStr = `${salaryStartDate.getDate()}.${(salaryStartDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    const endDateStr = `${salaryEndDate.getDate()}.${(salaryEndDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    
+    const confirmDelete = window.confirm(
+      `${months[monthIndex]} ${currentYear} maaş dövründəki bütün dərslər silinəcək\n(${startDateStr} - ${endDateStr})\n\n${monthLessons.length} dərs silinəcək. Davam etmək istəyirsiniz?`
+    );
+
+    if (confirmDelete && onClearMonth) {
+      onClearMonth(currentYear, monthIndex, salaryStartDate, salaryEndDate);
+    }
   };
 
   // Əgər ay seçilibsə və expanded-dirsə, o ayın calendar-ini göstər
@@ -395,12 +452,13 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson }: Calen
       {/* Months Grid */}
       <div className={styles.monthsGrid}>
         {months.map((monthName, monthIndex) => {
+          // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
+          const salaryStartDate = new Date(currentYear, monthIndex, 6);
+          const salaryEndDate = new Date(currentYear, monthIndex + 1, 5);
+          
           const monthLessons = lessons.filter((lesson) => {
             const lessonDate = new Date(lesson.date);
-            return (
-              lessonDate.getFullYear() === currentYear &&
-              lessonDate.getMonth() === monthIndex
-            );
+            return lessonDate >= salaryStartDate && lessonDate <= salaryEndDate;
           });
 
           return (
@@ -435,6 +493,62 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson }: Calen
 
                 {/* Hover effect */}
                 <div className={styles.hoverText}>Vuraraq açın →</div>
+
+                {/* Hover Action Buttons */}
+                <div className={styles.monthHoverButtons}>
+                  <button
+                    className={styles.monthActionButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      calculateMonthlySalary(monthIndex);
+                    }}
+                    title="Maaşı hesabla"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                    <span>Maaş</span>
+                  </button>
+                  <button
+                    className={`${styles.monthActionButton} ${styles.monthActionButtonSuccess}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCopyTemplate && onCopyTemplate('odd', currentYear, monthIndex);
+                    }}
+                    title="Tək günlər template-ini kopyala"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>Tək</span>
+                  </button>
+                  <button
+                    className={`${styles.monthActionButton} ${styles.monthActionButtonSuccess}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCopyTemplate && onCopyTemplate('even', currentYear, monthIndex);
+                    }}
+                    title="Cüt günlər template-ini kopyala"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>Cüt</span>
+                  </button>
+                  <button
+                    className={`${styles.monthActionButton} ${styles.monthActionButtonDanger}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearMonth(monthIndex);
+                    }}
+                    title="Ayı təmizlə"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Təmizlə</span>
+                  </button>
+                </div>
               </div>
             </div>
           );
