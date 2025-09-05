@@ -218,18 +218,26 @@
   0% {
     top: 50%;
     left: 50%;
-    width: var(--start-width);
-    height: var(--start-height);
-    transform: translate(-50%, -50%); /* start centered */
-    border-radius: 1rem;
+    width: min(92vw, 56rem);
+    height: min(85vh, 720px);
+    transform: translate(-50%, -50%); /* start centered and large */
+    border-radius: 12px;
     overflow: hidden;
   }
-  50% {
+  30% {
+    top: 50%;
+    left: 50%;
+    width: min(92vw, 56rem);
+    height: min(85vh, 720px);
+    transform: translate(-50%, -50%); /* stay large and centered */
+    border-radius: 12px;
+  }
+  70% {
     top: 50%;
     left: 50%;
     width: var(--start-width);
     height: var(--start-height);
-    transform: translate(-50%, -50%); /* remain centered mid-way */
+    transform: translate(-50%, -50%); /* shrink to original size */
     border-radius: 1rem;
   }
   100% {
@@ -248,20 +256,45 @@
 }
 
 .closeAnimation {
-  animation: closeAnimation 600ms ease-in forwards;
+  animation: closeAnimation 1000ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+
+/* Grow Animation - from centered original size to full dialog */
+@keyframes growAnimation {
+  0% {
+    top: 50%;
+    left: 50%;
+    width: var(--start-width);
+    height: var(--start-height);
+    transform: translate(-50%, -50%);
+    border-radius: 12px;
+  }
+  100% {
+    top: 50%;
+    left: 50%;
+    width: min(92vw, 56rem);
+    height: min(85vh, 720px);
+    transform: translate(-50%, -50%);
+    border-radius: 12px;
+  }
+}
+
+.growAnimation {
+  animation: growAnimation 520ms ease-out forwards;
 }
 
 /* Polished header styling - looks good even when compact */
 .expandedHeader {
-  background: linear-gradient(180deg, #0b0f4a 0%, #0a0f6a 100%);
+  background: linear-gradient(135deg, #030460 0%, #1e40af 100%);
   color: #fff;
-  padding: 12px 16px;
+  padding: 16px 20px;
   border-radius: 12px 12px 0 0;
   opacity: 0;
-  animation: fadeInContent 280ms ease-out 380ms forwards;
+  animation: fadeInContent 280ms ease-out 520ms forwards;
   position: relative;
-  min-height: 72px; /* compact height so it reads well when small */
-  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08);
+  min-height: 80px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .expandedHeaderContent {
@@ -273,33 +306,38 @@
 
 .expandedTitle {
   font-weight: 700;
-  font-size: clamp(18px, 2.4vw, 26px);
+  font-size: clamp(20px, 2.8vw, 28px);
   line-height: 1.2;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
   margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .expandedSubtitle {
-  color: rgba(255,255,255,0.8);
-  margin-top: 6px;
-  font-size: clamp(12px, 1.4vw, 14px);
-  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 8px;
+  font-size: clamp(13px, 1.5vw, 15px);
+  line-height: 1.4;
+  font-weight: 400;
 }
 
 .closeButton {
   color: #fff;
-  background: rgba(255,255,255,0.08);
-  width: 36px;
-  height: 36px;
+  background: rgba(255, 255, 255, 0.12);
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   border-radius: 9999px;
-  transition: background 150ms ease-out, transform 150ms ease-out, opacity 150ms ease-out;
+  transition: background 150ms ease-out, transform 150ms ease-out,
+    opacity 150ms ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .closeButton:hover {
-  background: rgba(255,255,255,0.16);
-  transform: scale(1.06);
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.08);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Divider between header and calendar area for compact look */
@@ -309,16 +347,19 @@
   right: 0;
   bottom: -1px;
   height: 1px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Content */
 .calendarContent {
-  padding: 1.5rem;
+  padding: 20px;
   opacity: 0;
   animation: fadeInContent 280ms ease-out 520ms forwards;
   overflow: hidden; /* prevent days from spilling out */
-  max-height: calc(90vh - 140px);
+  max-height: calc(90vh - 200px);
+  background: #f8faff;
+  border-radius: 0 0 12px 12px;
+  margin-top: 0;
 }
 
 @keyframes fadeInContent {
@@ -330,6 +371,26 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Week days header */
+.weekDaysHeader {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0 4px;
+}
+
+.weekDay {
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e40af;
+  padding: 8px 4px;
+  background: rgba(30, 64, 175, 0.08);
+  border-radius: 6px;
+  border: 1px solid rgba(30, 64, 175, 0.12);
 }
 
 /* Grid clipping */
@@ -355,11 +416,20 @@
 
 .calendarDay {
   aspect-ratio: 1;
-  padding: 0.5rem;
+  padding: 8px;
   border: 1px solid #93c5fd;
-  border-radius: 0.75rem;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 3.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .calendarDay:hover {
@@ -390,19 +460,22 @@
 }
 
 .dayNumber {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   line-height: 1.25rem;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
-  margin-bottom: 0.25rem;
+  margin-bottom: 4px;
+  color: #1e40af;
 }
 
 .dayNumberCurrentMonth {
-  color: #1e3a8a;
+  color: #1e40af;
+  font-weight: 700;
 }
 
 .dayNumberOtherMonth {
-  color: #3b82f6;
+  color: #93c5fd;
+  font-weight: 500;
 }
 
 .dayNumberToday {
@@ -411,21 +484,28 @@
 }
 
 .lessonIndicator {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   line-height: 1rem;
-  background-color: #93c5fd;
-  color: #1e3a8a;
-  padding: 0 0.25rem;
-  border-radius: 0.25rem;
-  margin-bottom: 0.25rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .moreLessonsText {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   line-height: 1rem;
-  color: #1d4ed8;
+  color: #2563eb;
   text-align: center;
+  font-weight: 500;
+  background: rgba(37, 99, 235, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-top: 2px;
 }

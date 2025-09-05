@@ -11,6 +11,7 @@
   z-index: 50;
 }
 
+
 .container {
   background: #E6EAFF;
   border-radius: 1.5rem;
@@ -180,6 +181,8 @@
   border: 1px solid #93c5fd;
   border-radius: 0.5rem;
   transition: all 0.15s ease-in-out;
+  color: #000000;
+  background-color: #ffffff;
 }
 
 .input:focus {
@@ -194,6 +197,8 @@
   border: 1px solid #93c5fd;
   border-radius: 0.5rem;
   transition: all 0.15s ease-in-out;
+  color: #000000;
+  background-color: #ffffff;
 }
 
 .select:focus {
@@ -209,6 +214,8 @@
   border-radius: 0.5rem;
   transition: all 0.15s ease-in-out;
   resize: vertical;
+  color: #000000;
+  background-color: #ffffff;
 }
 
 .textarea:focus {

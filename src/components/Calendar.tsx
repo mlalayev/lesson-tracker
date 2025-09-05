@@ -15,6 +15,7 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [showContent, setShowContent] = useState(false);
+  const [isGrowing, setIsGrowing] = useState(false);
   const [expandedPosition, setExpandedPosition] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const monthRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -78,9 +79,11 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
       setIsExpanded(true);
       setIsClosing(false);
       setShowContent(false);
+      setIsGrowing(false);
       
-      // Content-i 0.6s sonra göstər (div ortaya çatdıqdan sonra)
+      // after center animation (600ms), start grow and show content
       setTimeout(() => {
+        setIsGrowing(true);
         setShowContent(true);
       }, 600);
     }
@@ -89,11 +92,12 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
   const handleCloseMonth = () => {
     setIsClosing(true);
     setShowContent(false);
+    setIsGrowing(false);
     setTimeout(() => {
       setIsExpanded(false);
       setIsClosing(false);
       setSelectedMonth(null);
-    }, 1200);
+    }, 1000);
   };
 
   const goToPreviousYear = () => {
@@ -114,103 +118,106 @@ export default function Calendar({ lessons, onDateClick }: CalendarProps) {
     
     return (
       <div className={styles.expandedOverlay}>
+        {/* Container with two-stage animation */}
         <div 
-          className={styles.expandedContainer}
+          className={`${styles.expandedContainer} ${isClosing ? styles.closeAnimation : (isGrowing ? styles.growAnimation : styles.expandAnimation)}`}
           style={{
             position: 'fixed',
             top: expandedPosition.top,
             left: expandedPosition.left,
             width: expandedPosition.width,
             height: expandedPosition.height,
-            transform: 'translate(-50%, -50%)',
             zIndex: 50,
             '--start-top': `${expandedPosition.top}px`,
             '--start-left': `${expandedPosition.left}px`,
             '--start-width': `${expandedPosition.width}px`,
-            '--start-height': `${expandedPosition.height}px`,
-            animation: isClosing ? `${styles.closeAnimation} 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards` : `${styles.expandAnimation} 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+            '--start-height': `${expandedPosition.height}px`
           } as any}
         >
-          {/* Header */}
-          <div className={styles.expandedHeader} style={{ opacity: showContent ? 1 : 0 }}>
-            <div className={styles.expandedHeaderContent}>
-              <div>
-                <h2 className={styles.expandedTitle}>{months[selectedMonth]} {currentYear}</h2>
-                <p className={styles.expandedSubtitle}>Aya vuraraq günlərə dərs əlavə edin</p>
+          {/* Header inside container */}
+          {showContent && (
+            <div className={styles.expandedHeader}>
+              <div className={styles.expandedHeaderContent}>
+                <div>
+                  <h2 className={styles.expandedTitle}>{months[selectedMonth]} {currentYear}</h2>
+                  <p className={styles.expandedSubtitle}>Aya vuraraq günlərə dərs əlavə edin</p>
+                </div>
+                <button
+                  onClick={handleCloseMonth}
+                  className={styles.closeButton}
+                >
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <button
-                onClick={handleCloseMonth}
-                className={styles.closeButton}
-              >
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
-          </div>
+          )}
 
           {/* Calendar Content */}
-          <div className={styles.calendarContent} style={{ opacity: showContent ? 1 : 0 }}>
-            {/* Week days header */}
-            <div className={styles.weekDaysHeader}>
-              {weekDays.map((day, index) => (
-                <div key={index} className={styles.weekDay}>
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar grid */}
-            <div className={styles.calendarGrid}>
-              {days.map((day, dayIndex) => {
-                const dayLessons = getLessonsForDate(day.date);
-                const isToday = day.date.toDateString() === new Date().toDateString();
-                const isCurrentMonth = day.isCurrentMonth;
-                
-                const dayClasses = [
-                  styles.calendarDay,
-                  isCurrentMonth ? styles.calendarDayCurrentMonth : styles.calendarDayOtherMonth,
-                  isToday ? styles.calendarDayToday : '',
-                  dayLessons.length > 0 ? styles.calendarDayWithLessons : ''
-                ].filter(Boolean).join(' ');
-                
-                const numberClasses = [
-                  styles.dayNumber,
-                  isCurrentMonth ? styles.dayNumberCurrentMonth : styles.dayNumberOtherMonth,
-                  isToday ? styles.dayNumberToday : ''
-                ].filter(Boolean).join(' ');
-                
-                return (
-                  <div
-                    key={dayIndex}
-                    onClick={() => onDateClick(day.date)}
-                    className={dayClasses}
-                  >
-                    <div className={numberClasses}>
-                      {day.date.getDate()}
-                    </div>
-                    
-                    {/* Lesson indicators */}
-                    {dayLessons.slice(0, 2).map((lesson, lessonIndex) => (
-                      <div
-                        key={lesson.id}
-                        className={styles.lessonIndicator}
-                        title={`${lesson.time} - ${lesson.subject}`}
-                      >
-                        {lesson.time}
-                      </div>
-                    ))}
-                    
-                    {dayLessons.length > 2 && (
-                      <div className={styles.moreLessonsText}>
-                        +{dayLessons.length - 2} daha
-                      </div>
-                    )}
+          {showContent && (
+            <div className={styles.calendarContent}>
+              {/* Week days header */}
+              <div className={styles.weekDaysHeader}>
+                {weekDays.map((day, index) => (
+                  <div key={index} className={styles.weekDay}>
+                    {day}
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
+              {/* Calendar grid */}
+              <div className={styles.calendarGrid}>
+                {days.map((day, dayIndex) => {
+                  const dayLessons = getLessonsForDate(day.date);
+                  const isToday = day.date.toDateString() === new Date().toDateString();
+                  const isCurrentMonth = day.isCurrentMonth;
+                  
+                  const dayClasses = [
+                    styles.calendarDay,
+                    isCurrentMonth ? styles.calendarDayCurrentMonth : styles.calendarDayOtherMonth,
+                    isToday ? styles.calendarDayToday : '',
+                    dayLessons.length > 0 ? styles.calendarDayWithLessons : ''
+                  ].filter(Boolean).join(' ');
+                  
+                  const numberClasses = [
+                    styles.dayNumber,
+                    isCurrentMonth ? styles.dayNumberCurrentMonth : styles.dayNumberOtherMonth,
+                    isToday ? styles.dayNumberToday : ''
+                  ].filter(Boolean).join(' ');
+                  
+                  return (
+                    <div
+                      key={dayIndex}
+                      onClick={() => onDateClick(day.date)}
+                      className={dayClasses}
+                    >
+                      <div className={numberClasses}>
+                        {day.date.getDate()}
+                      </div>
+                      
+                      {/* Lesson indicators */}
+                      {dayLessons.slice(0, 2).map((lesson) => (
+                        <div
+                          key={lesson.id}
+                          className={styles.lessonIndicator}
+                          title={`${lesson.time} - ${lesson.subject}`}
+                        >
+                          {lesson.time}
+                        </div>
+                      ))}
+                      
+                      {dayLessons.length > 2 && (
+                        <div className={styles.moreLessonsText}>
+                          +{dayLessons.length - 2} daha
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
