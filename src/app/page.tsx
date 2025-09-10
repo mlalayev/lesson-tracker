@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Calendar from '../components/Calendar';
 import LessonModal from '../components/LessonModal';
 import TemplateModal from '../components/TemplateModal';
@@ -8,6 +9,7 @@ import { Lesson } from '../types/lesson';
 import styles from './page.module.css';
 
 export default function Home() {
+  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -22,6 +24,13 @@ export default function Home() {
   const [currentTemplateType, setCurrentTemplateType] = useState<'odd' | 'even'>('odd');
 
   useEffect(() => {
+    // Auth guard: require token
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    if (!token) {
+      router.replace('/login');
+      return;
+    }
+
     // Local storage-dan dərsləri və template-ləri yüklə
     const savedLessons = localStorage.getItem('lessons');
     if (savedLessons) {
@@ -59,10 +68,16 @@ export default function Home() {
       const currentDate = new Date(actualStartDate);
       
       while (currentDate <= salaryEndDate) {
-        const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay(); // Bazar = 7
-        
-        // Əgər bu gün qrupun gəldiyi günlərdəndirsə
-        if (lesson.groupDays.includes(dayOfWeek)) {
+        const isOddDate = currentDate.getDate() % 2 === 1;
+        const isEvenDate = currentDate.getDate() % 2 === 0;
+
+        // Nümunə: [1,3,5] → tək günlər, [2,4,6] → cüt günlər
+        const isOddPattern = lesson.groupDays.length === 3 && lesson.groupDays.every(d => [1,3,5].includes(d));
+        const isEvenPattern = lesson.groupDays.length === 3 && lesson.groupDays.every(d => [2,4,6].includes(d));
+
+        const shouldAdd = isOddPattern ? isOddDate : isEvenPattern ? isEvenDate : false;
+
+        if (shouldAdd) {
           const groupLesson: Lesson = {
             ...lesson,
             id: `${groupId}_${currentDate.getTime()}`,
@@ -71,7 +86,6 @@ export default function Home() {
             isGroupLesson: true
           };
           
-          // Əgər bu gün üçün dərs yoxdursa əlavə et
           const existingLesson = newLessons.find(l => 
             l.date === groupLesson.date && 
             l.time === groupLesson.time && 
@@ -83,7 +97,6 @@ export default function Home() {
           }
         }
         
-        // Növbəti günə keç
         currentDate.setDate(currentDate.getDate() + 1);
       }
     } else {
@@ -166,6 +179,14 @@ export default function Home() {
 
   const handleCloseTemplateModal = () => {
     setIsTemplateModalOpen(false);
+  };
+
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('authUser');
+      localStorage.removeItem('authToken');
+    }
+    router.replace('/login');
   };
 
   const handleCopyTemplate = (type: 'odd' | 'even', targetYear: number, targetMonth: number) => {
@@ -255,6 +276,17 @@ export default function Home() {
           </div>
         </div>
         
+        {/* Logout button */}
+        <div style={{ position: 'fixed', top: 12, right: 12, zIndex: 50 }}>
+          <button
+            onClick={handleLogout}
+            className={styles.cancelButton}
+            title="Çıxış"
+          >
+            Çıxış
+          </button>
+        </div>
+
         {isModalOpen && selectedDate && (
           <LessonModal
             date={selectedDate}

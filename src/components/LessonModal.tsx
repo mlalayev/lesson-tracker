@@ -22,7 +22,7 @@ export default function LessonModal({
 }: LessonModalProps) {
   const [formData, setFormData] = useState({
     time: '09:00',
-    subject: '',
+    subject: 'İngilis dili',
     studentName: '',
     notes: '',
     duration: 60,
@@ -245,19 +245,19 @@ export default function LessonModal({
 
             {/* Qrup Dərsi Tipi */}
             <div className={styles.formField}>
-              <label className={styles.label}>Qrup dərsi</label>
+              <label className={styles.label}>Qrup dərsi (tək/cüt günlər)</label>
               <select
                 value={groupType}
                 onChange={(e) => setGroupType(e.target.value as 'none' | 'odd' | 'even')}
                 className={styles.select}
               >
                 <option value="none">Yox</option>
-                <option value="odd">Tək günlər (B.e, Ç.a, C.)</option>
-                <option value="even">Cüt günlər (Ç.a, C.a, Ş.)</option>
+                <option value="odd">Tək günlər (1,3,5,... tarixlər)</option>
+                <option value="even">Cüt günlər (2,4,6,... tarixlər)</option>
               </select>
               {formData.isGroupLesson && (
                 <p className={styles.groupDaysHint}>
-                  Seçilmiş kateqoriyaya uyğun günlər avtomatik tətbiq olunur.
+                  Seçilmiş kateqoriyaya uyğun tarixlər (tək/cüt) avtomatik tətbiq olunur.
                 </p>)
               }
             </div>
