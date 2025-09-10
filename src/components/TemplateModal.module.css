@@ -149,6 +149,8 @@
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.875rem;
+  color: #374151;
+  background-color: white;
   transition: border-color 0.2s;
 }
 
@@ -157,6 +159,10 @@
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input::placeholder {
+  color: #9ca3af;
 }
 
 .formActions {

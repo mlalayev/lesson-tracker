@@ -50,9 +50,9 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
   const weekDays = ["S", "M", "T", "W", "Th", "Fr", "Sa"];
 
   const getDaysInMonth = (year: number, month: number) => {
-    // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
-    const salaryStartDate = new Date(year, month, 6);
-    const salaryEndDate = new Date(year, month + 1, 5);
+    // Maaş dövrü: ayın 1-dən ayın son gününə qədər
+    const salaryStartDate = new Date(year, month, 1);
+    const salaryEndDate = new Date(year, month + 1, 0);
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -162,9 +162,9 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
   };
 
   const calculateMonthlySalary = (monthIndex: number) => {
-    // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
-    const salaryStartDate = new Date(currentYear, monthIndex, 6);
-    const salaryEndDate = new Date(currentYear, monthIndex + 1, 5);
+    // Maaş dövrü: ayın 1-dən ayın son gününə qədər
+    const salaryStartDate = new Date(currentYear, monthIndex, 1);
+    const salaryEndDate = new Date(currentYear, monthIndex + 1, 0);
     
     const monthLessons = lessons.filter((lesson) => {
       const lessonDate = new Date(lesson.date);
@@ -186,9 +186,9 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
   };
 
   const clearMonth = (monthIndex: number) => {
-    // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
-    const salaryStartDate = new Date(currentYear, monthIndex, 6);
-    const salaryEndDate = new Date(currentYear, monthIndex + 1, 5);
+    // Maaş dövrü: ayın 1-dən ayın son gününə qədər
+    const salaryStartDate = new Date(currentYear, monthIndex, 1);
+    const salaryEndDate = new Date(currentYear, monthIndex + 1, 0);
     
     const monthLessons = lessons.filter((lesson) => {
       const lessonDate = new Date(lesson.date);
@@ -452,9 +452,9 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
       {/* Months Grid */}
       <div className={styles.monthsGrid}>
         {months.map((monthName, monthIndex) => {
-          // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
-          const salaryStartDate = new Date(currentYear, monthIndex, 6);
-          const salaryEndDate = new Date(currentYear, monthIndex + 1, 5);
+          // Maaş dövrü: ayın 1-dən ayın son gününə qədər
+          const salaryStartDate = new Date(currentYear, monthIndex, 1);
+          const salaryEndDate = new Date(currentYear, monthIndex + 1, 0);
           
           const monthLessons = lessons.filter((lesson) => {
             const lessonDate = new Date(lesson.date);

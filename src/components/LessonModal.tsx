@@ -30,6 +30,9 @@ export default function LessonModal({
     groupDays: [] as number[]
   });
 
+  // UI control for group type selection
+  const [groupType, setGroupType] = useState<'none' | 'odd' | 'even'>('none');
+
   const [calculatedPrice, setCalculatedPrice] = useState(0);
   const [studentCount, setStudentCount] = useState(0);
 
@@ -68,6 +71,17 @@ export default function LessonModal({
     setStudentCount(count);
     setCalculatedPrice(price);
   }, [formData.studentName, formData.subject]);
+
+  // Sync formData with selected groupType
+  useEffect(() => {
+    if (groupType === 'odd') {
+      setFormData(prev => ({ ...prev, isGroupLesson: true, groupDays: [1, 3, 5] }));
+    } else if (groupType === 'even') {
+      setFormData(prev => ({ ...prev, isGroupLesson: true, groupDays: [2, 4, 6] }));
+    } else {
+      setFormData(prev => ({ ...prev, isGroupLesson: false, groupDays: [] }));
+    }
+  }, [groupType]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,43 +243,24 @@ export default function LessonModal({
               />
             </div>
 
-            {/* Qrup Dərsi */}
+            {/* Qrup Dərsi Tipi */}
             <div className={styles.formField}>
-              <label className={styles.label}>
-                <input
-                  type="checkbox"
-                  checked={formData.isGroupLesson}
-                  onChange={(e) => handleInputChange('isGroupLesson', e.target.checked)}
-                  className={styles.checkbox}
-                />
-                <span className={styles.checkboxLabel}>Qrup dərsi (həftədə 3 dəfə)</span>
-              </label>
-            </div>
-
-            {/* Qrup Günləri */}
-            {formData.isGroupLesson && (
-              <div className={styles.formField}>
-                <label className={styles.label}>
-                  Qrupun gəldiyi günlər:
-                </label>
-                <div className={styles.groupDaysContainer}>
-                  {weekDays.map((day) => (
-                    <label key={day.value} className={styles.groupDayOption}>
-                      <input
-                        type="checkbox"
-                        checked={formData.groupDays.includes(day.value)}
-                        onChange={() => handleGroupDayToggle(day.value)}
-                        className={styles.groupDayCheckbox}
-                      />
-                      <span className={styles.groupDayLabel}>{day.label}</span>
-                    </label>
-                  ))}
-                </div>
+              <label className={styles.label}>Qrup dərsi</label>
+              <select
+                value={groupType}
+                onChange={(e) => setGroupType(e.target.value as 'none' | 'odd' | 'even')}
+                className={styles.select}
+              >
+                <option value="none">Yox</option>
+                <option value="odd">Tək günlər (B.e, Ç.a, C.)</option>
+                <option value="even">Cüt günlər (Ç.a, C.a, Ş.)</option>
+              </select>
+              {formData.isGroupLesson && (
                 <p className={styles.groupDaysHint}>
-                  Qrup dərsi seçsəniz, həmin ayın bütün seçilmiş günlərində avtomatik dərs yaradılacaq.
-                </p>
-              </div>
-            )}
+                  Seçilmiş kateqoriyaya uyğun günlər avtomatik tətbiq olunur.
+                </p>)
+              }
+            </div>
 
             {/* Düymələr */}
             <div className={styles.buttonGroup}>

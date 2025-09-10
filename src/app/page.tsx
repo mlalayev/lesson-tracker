@@ -46,20 +46,14 @@ export default function Home() {
       // Qrup dərsi üçün avtomatik dərslər yarat
       const groupId = `group_${Date.now()}`;
       const baseDate = new Date(lesson.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Günün başlanğıcını təyin et
-      
-      // Maaş dövrü: seçilmiş ayın 6-sından növbəti ayın 5-nə qədər
+      // Maaş dövrü: seçilmiş ayın 1-dən ayın son gününə qədər
       const selectedMonth = baseDate.getMonth();
       const selectedYear = baseDate.getFullYear();
-      const salaryStartDate = new Date(selectedYear, selectedMonth, 6);
-      const salaryEndDate = new Date(selectedYear, selectedMonth + 1, 5);
+      const salaryStartDate = new Date(selectedYear, selectedMonth, 1);
+      const salaryEndDate = new Date(selectedYear, selectedMonth + 1, 0);
       
-      // Seçilmiş tarix və bugündən hansı daha böyükdürsə ondan başla
-      const startFromDate = baseDate >= today ? baseDate : today;
-      
-      // Başlanğıc tarixi maaş dövrünün içində olmalıdır
-      const actualStartDate = startFromDate < salaryStartDate ? salaryStartDate : startFromDate;
+      // Başlanğıc tarixi maaş dövrünün içində olmalıdır (həmişə seçilmiş tarixdən başla)
+      const actualStartDate = baseDate < salaryStartDate ? salaryStartDate : baseDate;
       
       // Maaş dövrünün sonuna qədər bütün günləri yoxla
       const currentDate = new Date(actualStartDate);
@@ -184,9 +178,9 @@ export default function Home() {
     const days = type === 'odd' ? [1, 3, 5] : [2, 4, 6];
     const newLessons = [...lessons];
     
-    // Maaş dövrü: ayın 6-sından növbəti ayın 5-nə qədər
-    const salaryStartDate = new Date(targetYear, targetMonth, 6);
-    const salaryEndDate = new Date(targetYear, targetMonth + 1, 5);
+    // Maaş dövrü: ayın 1-dən ayın son gününə qədər
+    const salaryStartDate = new Date(targetYear, targetMonth, 1);
+    const salaryEndDate = new Date(targetYear, targetMonth + 1, 0);
     
     const currentDate = new Date(salaryStartDate);
     
