@@ -26,12 +26,9 @@ export default function LessonModal({
     studentName: '',
     notes: '',
     duration: 60,
-    isGroupLesson: false,
-    groupDays: [] as number[]
+    isGroupLesson: false
   });
 
-  // UI control for group type selection
-  const [groupType, setGroupType] = useState<'none' | 'odd' | 'even'>('none');
 
   const [calculatedPrice, setCalculatedPrice] = useState(0);
   const [studentCount, setStudentCount] = useState(0);
@@ -50,18 +47,11 @@ export default function LessonModal({
     'SAT',
     'TOEFL',
     'IELTS',
+    'Speaking',
+    'Kids',
     'Digər'
   ];
 
-  const weekDays = [
-    { value: 1, label: 'Bazar ertəsi' },
-    { value: 2, label: 'Çərşənbə axşamı' },
-    { value: 3, label: 'Çərşənbə' },
-    { value: 4, label: 'Cümə axşamı' },
-    { value: 5, label: 'Cümə' },
-    { value: 6, label: 'Şənbə' },
-    { value: 7, label: 'Bazar' }
-  ];
 
   // Qiymət hesablama
   useEffect(() => {
@@ -72,23 +62,19 @@ export default function LessonModal({
     setCalculatedPrice(price);
   }, [formData.studentName, formData.subject]);
 
-  // Sync formData with selected groupType
-  useEffect(() => {
-    if (groupType === 'odd') {
-      setFormData(prev => ({ ...prev, isGroupLesson: true, groupDays: [1, 3, 5] }));
-    } else if (groupType === 'even') {
-      setFormData(prev => ({ ...prev, isGroupLesson: true, groupDays: [2, 4, 6] }));
-    } else {
-      setFormData(prev => ({ ...prev, isGroupLesson: false, groupDays: [] }));
-    }
-  }, [groupType]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Local timezone istifadə et (UTC deyil)
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const localDateString = `${year}-${month}-${day}`;
+    
     const newLesson: Lesson = {
       id: Date.now().toString(),
-      date: date.toISOString().split('T')[0],
+      date: localDateString,
       ...formData
     };
     
@@ -102,14 +88,6 @@ export default function LessonModal({
     }));
   };
 
-  const handleGroupDayToggle = (dayValue: number) => {
-    setFormData(prev => ({
-      ...prev,
-      groupDays: prev.groupDays.includes(dayValue)
-        ? prev.groupDays.filter(day => day !== dayValue)
-        : [...prev.groupDays, dayValue]
-    }));
-  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('az-AZ', {
@@ -243,24 +221,6 @@ export default function LessonModal({
               />
             </div>
 
-            {/* Qrup Dərsi Tipi */}
-            <div className={styles.formField}>
-              <label className={styles.label}>Qrup dərsi (tək/cüt günlər)</label>
-              <select
-                value={groupType}
-                onChange={(e) => setGroupType(e.target.value as 'none' | 'odd' | 'even')}
-                className={styles.select}
-              >
-                <option value="none">Yox</option>
-                <option value="odd">Tək günlər (1,3,5,... tarixlər)</option>
-                <option value="even">Cüt günlər (2,4,6,... tarixlər)</option>
-              </select>
-              {formData.isGroupLesson && (
-                <p className={styles.groupDaysHint}>
-                  Seçilmiş kateqoriyaya uyğun tarixlər (tək/cüt) avtomatik tətbiq olunur.
-                </p>)
-              }
-            </div>
 
             {/* Düymələr */}
             <div className={styles.buttonGroup}>

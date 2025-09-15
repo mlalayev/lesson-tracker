@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Lesson } from "@/types/lesson";
 import { calculatePrice, calculateStudentCount } from "@/types/pricing";
 import styles from "./Calendar.module.css";
@@ -10,12 +10,13 @@ interface CalendarProps {
   lessons: Lesson[];
   onDateClick: (date: Date) => void;
   onDeleteLesson?: (lessonId: string) => void;
+  onDeleteLessonsByDate?: (date: Date) => void;
   onClearMonth?: (year: number, month: number, startDate?: Date, endDate?: Date) => void;
   onCopyTemplate?: (type: 'odd' | 'even', year: number, month: number) => void;
   onOpenTemplate?: (type: 'odd' | 'even', year: number) => void;
 }
 
-export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClearMonth, onCopyTemplate, onOpenTemplate }: CalendarProps) {
+export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDeleteLessonsByDate, onClearMonth, onCopyTemplate, onOpenTemplate }: CalendarProps) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -31,6 +32,35 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedDateForView, setSelectedDateForView] = useState<Date | null>(null);
   const monthRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [userName, setUserName] = useState<string>("");
+  const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem('authUser') : null;
+      if (raw) {
+        const u = JSON.parse(raw);
+        setUserName(u?.name || u?.email || "");
+      }
+    } catch {}
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.dropdown')) {
+        setShowTemplateDropdown(false);
+        setShowProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const months = [
     "Yanvar",
@@ -47,12 +77,12 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
     "Dekabr",
   ];
 
-  const weekDays = ["S", "M", "T", "W", "Th", "Fr", "Sa"];
+  const weekDays = ["M", "T", "W", "Th", "Fr", "Sa", "S"];
 
   const getDaysInMonth = (year: number, month: number) => {
     // Maaş dövrü: ayın 1-dən ayın son gününə qədər
-    const salaryStartDate = new Date(year, month, 1);
-    const salaryEndDate = new Date(year, month + 1, 0);
+    const salaryStartDate = new Date(year, month, 1, 12, 0, 0);
+    const salaryEndDate = new Date(year, month + 1, 0, 12, 0, 0);
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -65,17 +95,18 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
       isSalaryPeriod: boolean;
     }[] = [];
 
-    // Əvvəlki ayın son günləri (həftə düzülüşü üçün)
-    for (let i = startingDay - 1; i >= 0; i--) {
-      const prevDate = new Date(year, month, -i);
+    // Əvvəlki ayın son günləri (həftə düzülüşü üçün) - Monday başlanğıc
+    const mondayStartingDay = startingDay === 0 ? 6 : startingDay - 1; // Convert Sunday=0 to Saturday=6 for Monday start
+    for (let i = mondayStartingDay - 1; i >= 0; i--) {
+      const prevDate = new Date(year, month, -i, 12, 0, 0);
       const isSalaryPeriod =
         prevDate >= salaryStartDate && prevDate <= salaryEndDate;
       days.push({ date: prevDate, isCurrentMonth: false, isSalaryPeriod });
     }
 
-    // Cari ayın günləri
+    // Cari ayın günləri - timezone problemi yoxdur
     for (let i = 1; i <= daysInMonth; i++) {
-      const currentDate = new Date(year, month, i);
+      const currentDate = new Date(year, month, i, 12, 0, 0); // Günün ortasında yarat
       const isSalaryPeriod =
         currentDate >= salaryStartDate && currentDate <= salaryEndDate;
       days.push({ date: currentDate, isCurrentMonth: true, isSalaryPeriod });
@@ -84,7 +115,7 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
     // Növbəti ayın ilk günləri (6x7 = 42 hüceyrə)
     const remaining = 42 - days.length;
     for (let i = 1; i <= remaining; i++) {
-      const nextDate = new Date(year, month + 1, i);
+      const nextDate = new Date(year, month + 1, i, 12, 0, 0);
       const isSalaryPeriod =
         nextDate >= salaryStartDate && nextDate <= salaryEndDate;
       days.push({ date: nextDate, isCurrentMonth: false, isSalaryPeriod });
@@ -155,6 +186,25 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
   const handleCloseViewModal = () => {
     setIsViewModalOpen(false);
     setSelectedDateForView(null);
+  };
+
+  const handleClearDay = (date: Date) => {
+    const dateString = date.toISOString().split("T")[0];
+    const dayLessons = lessons.filter((lesson) => lesson.date === dateString);
+    
+    if (dayLessons.length === 0) {
+      alert("Bu gündə silinəcək dərs yoxdur.");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `${dateString} tarixindəki ${dayLessons.length} dərs silinəcək. Davam etmək istəyirsiniz?`
+    );
+
+    if (confirmDelete && onDeleteLessonsByDate) {
+      // Bütün dərsləri bir dəfədə sil
+      onDeleteLessonsByDate(date);
+    }
   };
 
   const goToCurrentYear = () => {
@@ -347,10 +397,10 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
                         </div>
                       )}
 
-                      {/* Hover icons */}
-                      <div className={styles.hoverIcons}>
-                        <button
-                          className={styles.hoverIcon}
+                      {/* Hover actions */}
+                      <div className={styles.hoverActions}>
+                        <div
+                          className={styles.hoverAction}
                           onClick={(e) => {
                             e.stopPropagation();
                             onDateClick(day.date);
@@ -360,20 +410,37 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                        </button>
-                        <button
-                          className={styles.hoverIcon}
+                          <span>Əlavə et</span>
+                        </div>
+                        <div
+                          className={styles.hoverAction}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleViewLessons(day.date);
                           }}
                           title="Dərslərə bax"
                         >
-                          <svg className="w-40 h-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                        </button>
+                          <span>Bax</span>
+                        </div>
+                        {dayLessons.length > 0 && (
+                          <div
+                            className={`${styles.hoverAction} ${styles.hoverActionDanger}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClearDay(day.date);
+                            }}
+                            title="Günü təmizlə"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span>Təmizlə</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -402,50 +469,145 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onClear
   // Əsas səhifə - ayların grid-i
   return (
     <div className={styles.container}>
-      {/* Year Navigation */}
-      <div className={styles.yearNavigation}>
-        <div className={styles.yearNavigationContent}>
-          <button onClick={goToPreviousYear} className={styles.navButton}>
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-
-          <div className="text-center">
-            <h2 className={styles.yearTitle}>{currentYear}</h2>
-            <button
-              onClick={goToCurrentYear}
-              className={styles.currentYearButton}
-            >
-              Bu il
-            </button>
+      {/* Header Navigation */}
+      <div className={styles.modernHeader}>
+        <div className={styles.headerContainer}>
+          {/* Left Section - Welcome */}
+          <div className={styles.left}>
+            <div className={styles.welcome}>
+              {userName ? (
+                <>
+                  <div className={styles.icon}>
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <span className={styles.text}>Welcome, {userName}</span>
+                </>
+              ) : (
+                <div className={styles.title}>Lesson Tracker</div>
+              )}
+            </div>
           </div>
 
-          <button onClick={goToNextYear} className={styles.navButton}>
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
+          {/* Center Section - Year Navigation */}
+          <div className={styles.center}>
+            <div className={styles.yearNav}>
+              <button onClick={goToPreviousYear} className={styles.navBtn}>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <div className={styles.yearDisplay}>
+                <h1 className={styles.year}>{currentYear}</h1>
+              </div>
+              
+              <button onClick={goToNextYear} className={styles.navBtn}>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Right Section - Controls */}
+          <div className={styles.right}>
+            {/* Template Dropdown */}
+            {onOpenTemplate && (
+              <div className={`${styles.dropdown} dropdown`}>
+                <button
+                  className={styles.dropdownButton}
+                  onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
+                  title="Template Options"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Templates
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showTemplateDropdown && (
+                  <div className={styles.dropdownMenu}>
+                    <button
+                      className={styles.dropdownItem}
+                      onClick={() => {
+                        onOpenTemplate('odd', currentYear);
+                        setShowTemplateDropdown(false);
+                      }}
+                    >
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      Odd Days Template
+                    </button>
+                    <button
+                      className={styles.dropdownItem}
+                      onClick={() => {
+                        onOpenTemplate('even', currentYear);
+                        setShowTemplateDropdown(false);
+                      }}
+                    >
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      Even Days Template
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Profile Dropdown */}
+            <div className={`${styles.dropdown} dropdown`}>
+              <button
+                className={styles.profileButton}
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                title="Profile Menu"
+              >
+                <div className={styles.profileAvatar}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <span className={styles.profileText}>Profile</span>
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showProfileDropdown && (
+                <div className={styles.dropdownMenu}>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      window.location.href = '/login';
+                      setShowProfileDropdown(false);
+                    }}
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    View Profile
+                  </button>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      localStorage.removeItem('authUser');
+                      window.location.href = '/login';
+                      setShowProfileDropdown(false);
+                    }}
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

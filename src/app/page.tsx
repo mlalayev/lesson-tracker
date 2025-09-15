@@ -39,7 +39,10 @@ export default function Home() {
     
     const savedTemplates = localStorage.getItem('templates');
     if (savedTemplates) {
-      setTemplates(JSON.parse(savedTemplates));
+      const templates = JSON.parse(savedTemplates);
+      // Debug: Clear templates to fix day assignments - remove this after testing
+      console.log('Current templates:', templates);
+      setTemplates(templates);
     }
   }, []);
 
@@ -49,90 +52,28 @@ export default function Home() {
   };
 
   const handleSaveLesson = (lesson: Lesson) => {
-    let newLessons = [...lessons];
-    
-    if (lesson.isGroupLesson && lesson.groupDays && lesson.groupDays.length > 0) {
-      // Qrup dərsi üçün avtomatik dərslər yarat
-      const groupId = `group_${Date.now()}`;
-      const baseDate = new Date(lesson.date);
-      // Maaş dövrü: seçilmiş ayın 1-dən ayın son gününə qədər
-      const selectedMonth = baseDate.getMonth();
-      const selectedYear = baseDate.getFullYear();
-      const salaryStartDate = new Date(selectedYear, selectedMonth, 1);
-      const salaryEndDate = new Date(selectedYear, selectedMonth + 1, 0);
-      
-      // Başlanğıc tarixi maaş dövrünün içində olmalıdır (həmişə seçilmiş tarixdən başla)
-      const actualStartDate = baseDate < salaryStartDate ? salaryStartDate : baseDate;
-      
-      // Maaş dövrünün sonuna qədər bütün günləri yoxla
-      const currentDate = new Date(actualStartDate);
-      
-      while (currentDate <= salaryEndDate) {
-        const isOddDate = currentDate.getDate() % 2 === 1;
-        const isEvenDate = currentDate.getDate() % 2 === 0;
-
-        // Nümunə: [1,3,5] → tək günlər, [2,4,6] → cüt günlər
-        const isOddPattern = lesson.groupDays.length === 3 && lesson.groupDays.every(d => [1,3,5].includes(d));
-        const isEvenPattern = lesson.groupDays.length === 3 && lesson.groupDays.every(d => [2,4,6].includes(d));
-
-        const shouldAdd = isOddPattern ? isOddDate : isEvenPattern ? isEvenDate : false;
-
-        if (shouldAdd) {
-          const groupLesson: Lesson = {
-            ...lesson,
-            id: `${groupId}_${currentDate.getTime()}`,
-            date: currentDate.toISOString().split('T')[0],
-            groupId: groupId,
-            isGroupLesson: true
-          };
-          
-          const existingLesson = newLessons.find(l => 
-            l.date === groupLesson.date && 
-            l.time === groupLesson.time && 
-            l.studentName === groupLesson.studentName
-          );
-          
-          if (!existingLesson) {
-            newLessons.push(groupLesson);
-          }
-        }
-        
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-    } else {
-      // Adi dərs
-      newLessons.push(lesson);
-    }
-    
+    const newLessons = [...lessons, lesson];
     setLessons(newLessons);
     localStorage.setItem('lessons', JSON.stringify(newLessons));
     setIsModalOpen(false);
   };
 
   const handleDeleteLesson = (lessonId: string) => {
-    const lessonToDelete = lessons.find(lesson => lesson.id === lessonId);
-    let newLessons = [...lessons];
+    const newLessons = lessons.filter(lesson => lesson.id !== lessonId);
+    setLessons(newLessons);
+    localStorage.setItem('lessons', JSON.stringify(newLessons));
+  };
+
+  const handleDeleteLessonsByDate = (date: Date) => {
+    const dateString = date.toISOString().split("T")[0];
+    const dayLessons = lessons.filter((lesson) => lesson.date === dateString);
     
-    if (lessonToDelete?.isGroupLesson && lessonToDelete.groupId) {
-      // Qrup dərsi silinirsə, yalnız gələcək günlərdə sil
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Günün başlanğıcı
-      
-      newLessons = newLessons.filter(lesson => {
-        if (lesson.groupId === lessonToDelete.groupId) {
-          const lessonDate = new Date(lesson.date);
-          lessonDate.setHours(0, 0, 0, 0);
-          
-          // Əgər dərs tarixi bugündən sonradırsa sil, əks halda qalsın
-          return lessonDate < today;
-        }
-        return true; // Qrup dərsi deyilsə qalsın
-      });
-    } else {
-      // Adi dərs silinirsə
-      newLessons = newLessons.filter(lesson => lesson.id !== lessonId);
+    if (dayLessons.length === 0) {
+      return;
     }
-    
+
+    // Bütün dərsləri bir dəfədə sil
+    const newLessons = lessons.filter(lesson => lesson.date !== dateString);
     setLessons(newLessons);
     localStorage.setItem('lessons', JSON.stringify(newLessons));
   };
@@ -196,7 +137,10 @@ export default function Home() {
       return;
     }
 
-    const days = type === 'odd' ? [1, 3, 5] : [2, 4, 6];
+    // Fix: JavaScript getDay() returns 0=Sunday, 1=Monday, etc.
+    // For odd days: Monday(1), Wednesday(3), Friday(5)
+    // For even days: Tuesday(2), Thursday(4), Saturday(6)
+    const days = type === 'odd' ? [1, 3, 5] : [2, 4, 6]; // Monday(1), Wednesday(3), Friday(5) vs Tuesday(2), Thursday(4), Saturday(6)
     const newLessons = [...lessons];
     
     // Maaş dövrü: ayın 1-dən ayın son gününə qədər
@@ -206,7 +150,7 @@ export default function Home() {
     const currentDate = new Date(salaryStartDate);
     
     while (currentDate <= salaryEndDate) {
-      const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay();
+      const dayOfWeek = currentDate.getDay(); // 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
       
       if (days.includes(dayOfWeek)) {
         template.forEach((templateLesson) => {
@@ -246,46 +190,12 @@ export default function Home() {
           lessons={lessons}
           onDateClick={handleDateClick}
           onDeleteLesson={handleDeleteLesson}
+          onDeleteLessonsByDate={handleDeleteLessonsByDate}
           onClearMonth={handleClearMonth}
           onCopyTemplate={handleCopyTemplate}
           onOpenTemplate={handleOpenTemplate}
         />
 
-        {/* Floating Template Button */}
-        <div className={styles.floatingButton}>
-          <div className={styles.floatingButtonContent}>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2h-2m-5-3v4m0 0h4m-4 0l4-4m-4 4L9 9" />
-            </svg>
-          </div>
-          
-          {/* Hover Menu */}
-          <div className={styles.floatingMenu}>
-            <button 
-              className={styles.templateButton}
-              onClick={() => handleCreateTemplate('odd')}
-            >
-              <span>Tək günlər (1,3,5)</span>
-            </button>
-            <button 
-              className={styles.templateButton}
-              onClick={() => handleCreateTemplate('even')}
-            >
-              <span>Cüt günlər (2,4,6)</span>
-            </button>
-          </div>
-        </div>
-        
-        {/* Logout button */}
-        <div style={{ position: 'fixed', top: 12, right: 12, zIndex: 50 }}>
-          <button
-            onClick={handleLogout}
-            className={styles.cancelButton}
-            title="Çıxış"
-          >
-            Çıxış
-          </button>
-        </div>
 
         {isModalOpen && selectedDate && (
           <LessonModal

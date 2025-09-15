@@ -41,7 +41,8 @@ export const PRICING_CONFIG: SubjectPricing[] = [
       { minStudents: 1, price: 3 },
       { minStudents: 2, price: 4 },
       { minStudents: 3, price: 5 },
-      { minStudents: 4, price: 6 }
+      { minStudents: 4, price: 6 },
+      { minStudents: 5, price: 7 }
     ]
   },
   {

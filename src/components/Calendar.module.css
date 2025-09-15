@@ -6,6 +6,278 @@
   gap: 2rem;
 }
 
+/* Modern Header Styles */
+.modernHeader {
+  background: #e6eaff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+}
+
+/* Left Section */
+.left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.welcome {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #374151;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6b7280;
+}
+
+.text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Center Section */
+.center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.yearNav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f9fafb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  height: 2.5rem;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  border: 1px solid #d1d5db;
+}
+
+.navBtn:hover {
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #9ca3af;
+}
+
+.yearDisplay {
+  text-align: center;
+  color: #111827;
+}
+
+.year {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+  line-height: 1;
+}
+
+.yearLink {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 400;
+  text-decoration: underline;
+  margin-top: 0.125rem;
+  transition: color 0.2s ease;
+}
+
+.yearLink:hover {
+  color: #374151;
+}
+
+/* Right Section */
+.right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Dropdown Styles */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdownButton {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.dropdownButton:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.profileButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.profileButton:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.profileAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6b7280;
+}
+
+.profileText {
+  font-weight: 600;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  z-index: 50;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  color: #374151;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdownItem:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.dropdownItem:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header Responsive Design */
+@media (max-width: 768px) {
+  .headerContainer {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .headerLeft,
+  .headerCenter,
+  .headerRight {
+    flex: none;
+  }
+  
+  .yearNavigationWrapper {
+    gap: 1rem;
+    padding: 0.625rem 1.25rem;
+  }
+  
+  .currentYear {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .headerContainer {
+    padding: 0.75rem 1rem;
+  }
+  
+  .currentYear {
+    font-size: 1.25rem;
+  }
+  
+  .yearNavButton {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+/* Legacy styles for backward compatibility */
 .yearNavigation {
   background: #e6eaff;
   border-radius: 1rem;
@@ -480,7 +752,7 @@
 .calendarGrid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  grid-template-rows: repeat(6, 1fr); /* exactly 6 rows */
+  grid-template-rows: repeat(6, 1fr);
   gap: 0.2rem;
   height: 91%;
 }
@@ -499,7 +771,6 @@
 }
 
 .calendarDay {
-  /* stretch to row height */
   padding: 2px;
   border: 1px solid #93c5fd;
   border-radius: 4px;
@@ -524,7 +795,7 @@
   transform: scale(1.05);
 }
 
-.calendarDay:hover .hoverIcons {
+.calendarDay:hover .hoverActions {
   opacity: 1;
   visibility: visible;
 }
@@ -617,17 +888,15 @@
   margin-top: 1px;
 }
 
-/* Hover Icons */
-.hoverIcons {
+/* Hover Actions */
+.hoverActions {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  flex-direction: column;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(4px);
   opacity: 0;
@@ -636,28 +905,46 @@
   border-radius: 4px;
 }
 
-.hoverIcon {
+.hoverAction {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
+  flex: 1;
+  gap: 0.25rem;
   background: #3b82f6;
   color: white;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
-.hoverIcon:hover {
+.hoverAction:hover {
   background: #2563eb;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.hoverIcon svg {
-  width: 20px;
-  height: 20px;
+.hoverAction:first-child {
+  border-radius: 4px 4px 0 0;
+}
+
+.hoverAction:last-child {
+  border-radius: 0 0 4px 4px;
+}
+
+.hoverAction:only-child {
+  border-radius: 4px;
+}
+
+.hoverActionDanger {
+  background: #dc2626;
+}
+
+.hoverActionDanger:hover {
+  background: #b91c1c;
+}
+
+.hoverAction svg {
+  width: 16px;
+  height: 16px;
 }

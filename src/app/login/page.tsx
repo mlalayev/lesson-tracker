@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,8 +23,13 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
 
-    if (!email || !password || (mode === 'signup' && !name)) {
+    if (!email || !password || (mode === 'signup' && (!name || !confirmPassword))) {
       setError('Zəhmət olmasa bütün xanaları doldurun.');
+      return;
+    }
+
+    if (mode === 'signup' && password !== confirmPassword) {
+      setError('Şifrələr eyni deyil.');
       return;
     }
 
@@ -69,10 +75,6 @@ export default function LoginPage() {
   return (
     <div className={styles.wrapper}>
       <div className={styles.card}>
-        <div className={styles.tabs}>
-          <button className={`${styles.tabButton} ${mode === 'login' ? styles.tabButtonActive : ''}`} onClick={() => setMode('login')}>Giriş</button>
-          <button className={`${styles.tabButton} ${mode === 'signup' ? styles.tabButtonActive : ''}`} onClick={() => setMode('signup')}>Qeydiyyat</button>
-        </div>
         <h1 className={styles.title}>{mode === 'login' ? 'Yenidən xoş gəldiniz' : 'Hesab yaradın'}</h1>
         <p className={styles.subtitle}>Davam etmək üçün məlumatlarınızı daxil edin.</p>
         {error && <div className={styles.error}>{error}</div>}
@@ -91,6 +93,12 @@ export default function LoginPage() {
             <label className={styles.label}>Şifrə</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={styles.input} placeholder="••••••••" />
           </div>
+          {mode === 'signup' && (
+            <div>
+              <label className={styles.label}>Şifrə (təkrar)</label>
+              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={styles.input} placeholder="••••••••" />
+            </div>
+          )}
           <button type="submit" className={styles.submitButton} disabled={loading}>
             {loading ? 'Gözləyin...' : mode === 'login' ? 'Daxil ol' : 'Qeydiyyatdan keç'}
           </button>
