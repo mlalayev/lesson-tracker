@@ -5,18 +5,15 @@ import { Lesson } from "@/types/lesson";
 import { calculatePrice, calculateStudentCount } from "@/types/pricing";
 import styles from "./Calendar.module.css";
 import ViewLessonsModal from "./ViewLessonsModal";
+import TemplatesModal from "./TemplatesModal";
 
 interface CalendarProps {
   lessons: Lesson[];
   onDateClick: (date: Date) => void;
   onDeleteLesson?: (lessonId: string) => void;
-  onDeleteLessonsByDate?: (date: Date) => void;
-  onClearMonth?: (year: number, month: number, startDate?: Date, endDate?: Date) => void;
-  onCopyTemplate?: (type: 'odd' | 'even', year: number, month: number) => void;
-  onOpenTemplate?: (type: 'odd' | 'even', year: number) => void;
 }
 
-export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDeleteLessonsByDate, onClearMonth, onCopyTemplate, onOpenTemplate }: CalendarProps) {
+export default function Calendar({ lessons, onDateClick, onDeleteLesson }: CalendarProps) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -33,8 +30,10 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDelet
   const [selectedDateForView, setSelectedDateForView] = useState<Date | null>(null);
   const monthRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [userName, setUserName] = useState<string>("");
-  const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
+  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
+  const [templateType, setTemplateType] = useState<'odd' | 'even' | null>(null);
 
   useEffect(() => {
     try {
@@ -51,8 +50,8 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDelet
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
       if (!target.closest('.dropdown')) {
-        setShowTemplateDropdown(false);
         setShowProfileDropdown(false);
+        setShowTemplatesDropdown(false);
       }
     };
 
@@ -188,24 +187,6 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDelet
     setSelectedDateForView(null);
   };
 
-  const handleClearDay = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
-    const dayLessons = lessons.filter((lesson) => lesson.date === dateString);
-    
-    if (dayLessons.length === 0) {
-      alert("Bu gündə silinəcək dərs yoxdur.");
-      return;
-    }
-
-    const confirmDelete = window.confirm(
-      `${dateString} tarixindəki ${dayLessons.length} dərs silinəcək. Davam etmək istəyirsiniz?`
-    );
-
-    if (confirmDelete && onDeleteLessonsByDate) {
-      // Bütün dərsləri bir dəfədə sil
-      onDeleteLessonsByDate(date);
-    }
-  };
 
   const goToCurrentYear = () => {
     setCurrentYear(new Date().getFullYear());
@@ -235,34 +216,98 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDelet
     alert(`${months[monthIndex]} ${currentYear} maaşı\n(${startDateStr} - ${endDateStr})\n\nÜmumi maaş: ${totalSalary} AZN\nDərs sayı: ${monthLessons.length}`);
   };
 
-  const clearMonth = (monthIndex: number) => {
-    // Maaş dövrü: ayın 1-dən ayın son gününə qədər
-    const salaryStartDate = new Date(currentYear, monthIndex, 1);
-    const salaryEndDate = new Date(currentYear, monthIndex + 1, 0);
-    
-    const monthLessons = lessons.filter((lesson) => {
-      const lessonDate = new Date(lesson.date);
-      return lessonDate >= salaryStartDate && lessonDate <= salaryEndDate;
-    });
-
-    if (monthLessons.length === 0) {
-      const startDateStr = `${salaryStartDate.getDate()}.${(salaryStartDate.getMonth() + 1).toString().padStart(2, '0')}`;
-      const endDateStr = `${salaryEndDate.getDate()}.${(salaryEndDate.getMonth() + 1).toString().padStart(2, '0')}`;
-      alert(`${months[monthIndex]} maaş dövründə (${startDateStr} - ${endDateStr}) silinəcək dərs yoxdur.`);
-      return;
-    }
-
-    const startDateStr = `${salaryStartDate.getDate()}.${(salaryStartDate.getMonth() + 1).toString().padStart(2, '0')}`;
-    const endDateStr = `${salaryEndDate.getDate()}.${(salaryEndDate.getMonth() + 1).toString().padStart(2, '0')}`;
-    
-    const confirmDelete = window.confirm(
-      `${months[monthIndex]} ${currentYear} maaş dövründəki bütün dərslər silinəcək\n(${startDateStr} - ${endDateStr})\n\n${monthLessons.length} dərs silinəcək. Davam etmək istəyirsiniz?`
-    );
-
-    if (confirmDelete && onClearMonth) {
-      onClearMonth(currentYear, monthIndex, salaryStartDate, salaryEndDate);
+  const handleClearDay = (date: Date) => {
+    try {
+      const yyyy = date.getFullYear();
+      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+      const dd = date.getDate().toString().padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+      const existingRaw = typeof window !== 'undefined' ? localStorage.getItem('lessons') : null;
+      const existingLessons = existingRaw ? JSON.parse(existingRaw) as any[] : [];
+      const filtered = existingLessons.filter(l => l.date !== dateStr);
+      localStorage.setItem('lessons', JSON.stringify(filtered));
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
     }
   };
+
+  const handleClearMonth = (monthIndex: number) => {
+    try {
+      const monthStart = new Date(currentYear, monthIndex, 1, 12, 0, 0);
+      const monthEnd = new Date(currentYear, monthIndex + 1, 0, 12, 0, 0);
+      const existingRaw = typeof window !== 'undefined' ? localStorage.getItem('lessons') : null;
+      const existingLessons = existingRaw ? JSON.parse(existingRaw) as any[] : [];
+      const filtered = existingLessons.filter(l => {
+        const d = new Date(l.date);
+        return d < monthStart || d > monthEnd;
+      });
+      localStorage.setItem('lessons', JSON.stringify(filtered));
+      alert(`Cleared all lessons in ${months[monthIndex]} ${currentYear}.`);
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const copyTemplateToMonth = (template: 'odd' | 'even', monthIndex: number) => {
+    try {
+      const key = template === 'odd' ? 'template_odd_days' : 'template_even_days';
+      const raw = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+      const templateLessons: Array<{ time: string; subject: string; studentName: string; notes?: string; duration: number; }> = raw ? JSON.parse(raw) : [];
+      if (!templateLessons || templateLessons.length === 0) {
+        alert('No template lessons found.');
+        return;
+      }
+
+      const start = new Date(currentYear, monthIndex, 1, 12, 0, 0);
+      const end = new Date(currentYear, monthIndex + 1, 0, 12, 0, 0);
+      const daysInMonth = end.getDate();
+
+      // odd => Mon(1), Wed(3), Fri(5); even => Tue(2), Thu(4), Sat(6)
+      const targetWeekdays = template === 'odd' ? [1, 3, 5] : [2, 4, 6];
+
+      const existingRaw = typeof window !== 'undefined' ? localStorage.getItem('lessons') : null;
+      const existingLessons = existingRaw ? JSON.parse(existingRaw) as any[] : [];
+
+      let addedCount = 0;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateObj = new Date(currentYear, monthIndex, d, 12, 0, 0);
+        const weekday = dateObj.getDay(); // 0 Sun ... 6 Sat
+        const weekdayMonStart = weekday === 0 ? 6 : weekday - 1; // 0 Mon ... 6 Sun
+        if (!targetWeekdays.includes(weekdayMonStart)) continue;
+
+        const yyyy = dateObj.getFullYear();
+        const mm = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const dd = dateObj.getDate().toString().padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+
+        for (const tl of templateLessons) {
+          // Prevent duplicate same date+time entries
+          const duplicate = existingLessons.some(l => l.date === dateStr && l.time === tl.time);
+          if (duplicate) continue;
+          existingLessons.push({
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            date: dateStr,
+            time: tl.time,
+            subject: tl.subject,
+            studentName: tl.studentName,
+            notes: tl.notes || '',
+            duration: tl.duration || 60,
+          });
+          addedCount++;
+        }
+      }
+
+      localStorage.setItem('lessons', JSON.stringify(existingLessons));
+      alert(`Added ${addedCount} lessons to ${months[monthIndex]} ${currentYear}.`);
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+      alert('Failed to copy template to month.');
+    }
+  };
+
 
   // Əgər ay seçilibsə və expanded-dirsə, o ayın calendar-ini göstər
   if (selectedMonth !== null && isExpanded) {
@@ -513,52 +558,50 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDelet
 
           {/* Right Section - Controls */}
           <div className={styles.right}>
-            {/* Template Dropdown */}
-            {onOpenTemplate && (
-              <div className={`${styles.dropdown} dropdown`}>
-                <button
-                  className={styles.dropdownButton}
-                  onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
-                  title="Template Options"
-                >
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Templates
-                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {showTemplateDropdown && (
-                  <div className={styles.dropdownMenu}>
-                    <button
-                      className={styles.dropdownItem}
-                      onClick={() => {
-                        onOpenTemplate('odd', currentYear);
-                        setShowTemplateDropdown(false);
-                      }}
-                    >
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                      Odd Days Template
-                    </button>
-                    <button
-                      className={styles.dropdownItem}
-                      onClick={() => {
-                        onOpenTemplate('even', currentYear);
-                        setShowTemplateDropdown(false);
-                      }}
-                    >
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                      Even Days Template
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+
+            {/* Templates Dropdown */}
+            <div className={`${styles.dropdown} dropdown`}>
+              <button
+                className={styles.dropdownButton}
+                onClick={() => {
+                  setShowTemplatesDropdown(!showTemplatesDropdown);
+                  setShowProfileDropdown(false);
+                }}
+                title="Templates"
+              >
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                Templates
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showTemplatesDropdown && (
+                <div className={styles.dropdownMenu}>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      setTemplateType('odd');
+                      setIsTemplatesModalOpen(true);
+                      setShowTemplatesDropdown(false);
+                    }}
+                  >
+                    Odd days template
+                  </button>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      setTemplateType('even');
+                      setIsTemplatesModalOpen(true);
+                      setShowTemplatesDropdown(false);
+                    }}
+                  >
+                    Even days template
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Profile Dropdown */}
             <div className={`${styles.dropdown} dropdown`}>
@@ -675,40 +718,40 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDelet
                     className={`${styles.monthActionButton} ${styles.monthActionButtonSuccess}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onCopyTemplate && onCopyTemplate('odd', currentYear, monthIndex);
+                      copyTemplateToMonth('odd', monthIndex);
                     }}
-                    title="Tək günlər template-ini kopyala"
+                    title="Copy odd days template"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8M8 11h8m-7 4h6M5 7h.01M5 11h.01M5 15h.01" />
                     </svg>
-                    <span>Tək</span>
+                    <span>Odd</span>
                   </button>
                   <button
                     className={`${styles.monthActionButton} ${styles.monthActionButtonSuccess}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onCopyTemplate && onCopyTemplate('even', currentYear, monthIndex);
+                      copyTemplateToMonth('even', monthIndex);
                     }}
-                    title="Cüt günlər template-ini kopyala"
+                    title="Copy even days template"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8M8 11h8m-7 4h6M19 7h.01M19 11h.01M19 15h.01" />
                     </svg>
-                    <span>Cüt</span>
+                    <span>Even</span>
                   </button>
                   <button
                     className={`${styles.monthActionButton} ${styles.monthActionButtonDanger}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      clearMonth(monthIndex);
+                      handleClearMonth(monthIndex);
                     }}
-                    title="Ayı təmizlə"
+                    title="Clear month"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    <span>Təmizlə</span>
+                    <span>Clear</span>
                   </button>
                 </div>
               </div>
@@ -726,6 +769,17 @@ export default function Calendar({ lessons, onDateClick, onDeleteLesson, onDelet
           )}
           onClose={handleCloseViewModal}
           onDelete={onDeleteLesson || (() => {})}
+        />
+      )}
+
+      {/* Templates Modal */}
+      {isTemplatesModalOpen && templateType && (
+        <TemplatesModal
+          templateType={templateType}
+          onClose={() => {
+            setIsTemplatesModalOpen(false);
+            setTemplateType(null);
+          }}
         />
       )}
     </div>

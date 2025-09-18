@@ -224,6 +224,11 @@
   border-color: transparent;
 }
 
+/* Ensure all form controls show black text */
+.input, .select, .textarea {
+  color: #000000;
+}
+
 /* Checkbox styles */
 .checkbox {
   margin-right: 0.5rem;

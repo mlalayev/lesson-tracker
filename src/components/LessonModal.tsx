@@ -26,7 +26,6 @@ export default function LessonModal({
     studentName: '',
     notes: '',
     duration: 60,
-    isGroupLesson: false
   });
 
 
