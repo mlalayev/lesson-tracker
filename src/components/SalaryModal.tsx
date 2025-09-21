@@ -61,7 +61,7 @@ export default function SalaryModal({ isOpen, onClose, lessons, monthName, year 
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>💰 {monthName} {year} Maaş Hesabatı</h2>
+          <h2>{monthName} {year} Maaş Hesabatı</h2>
           <button className={styles.closeButton} onClick={onClose}>
             ×
           </button>
@@ -75,16 +75,12 @@ export default function SalaryModal({ isOpen, onClose, lessons, monthName, year 
             </div>
             <div className={styles.summaryCard}>
               <div className={styles.summaryValue}>{totalLessons}</div>
-              <div className={styles.summaryLabel}>Ümumi Dərs Sayı</div>
-            </div>
-            <div className={styles.summaryCard}>
-              <div className={styles.summaryValue}>{lessonGroups.length}</div>
-              <div className={styles.summaryLabel}>Fərqli Kateqoriya</div>
+              <div className={styles.summaryLabel}>Dərs Sayı</div>
             </div>
           </div>
 
           <div className={styles.breakdown}>
-            <h3>📊 Detallı Bölgü</h3>
+            <h3>Dərs Bölgüsü</h3>
             {lessonGroups.length === 0 ? (
               <div className={styles.noLessons}>
                 Bu ayda heç bir dərs tapılmadı.
@@ -97,7 +93,7 @@ export default function SalaryModal({ isOpen, onClose, lessons, monthName, year 
                       <div className={styles.groupTitle}>
                         <span className={styles.subject}>{group.subject}</span>
                         <span className={styles.studentInfo}>
-                          ({group.studentCount} tələbə{group.studentCount > 1 ? 'li' : 'li'})
+                          {group.studentCount} tələbə
                         </span>
                       </div>
                       <div className={styles.groupTotal}>
@@ -113,7 +109,7 @@ export default function SalaryModal({ isOpen, onClose, lessons, monthName, year 
                       </span>
                     </div>
                     
-                    {/* Show some example student names */}
+                    {/* Show student names in simplified format */}
                     <div className={styles.studentExamples}>
                       {group.lessons.slice(0, 3).map((lesson, idx) => (
                         <div key={idx} className={styles.studentExample}>
@@ -140,11 +136,6 @@ export default function SalaryModal({ isOpen, onClose, lessons, monthName, year 
           </div>
         </div>
 
-        <div className={styles.footer}>
-          <button className={styles.closeBtn} onClick={onClose}>
-            Bağla
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import ViewLessonsModal from "./ViewLessonsModal";
 import TemplatesModal from "./TemplatesModal";
 import SalaryModal from "./SalaryModal";
 import NotificationModal from "./NotificationModal";
+import ConfirmationModal from "./ConfirmationModal";
 
 interface CalendarProps {
   lessons: Lesson[];
@@ -68,6 +69,19 @@ export default function Calendar({
     title: '',
     message: '',
     type: 'info'
+  });
+
+  // Confirmation modal state
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
   });
   
   // Client-side only state for template existence
@@ -401,7 +415,19 @@ export default function Calendar({
     }
   };
 
-  const handleClearMonth = async (monthIndex: number) => {
+  const handleClearMonth = (monthIndex: number) => {
+    const monthName = months[monthIndex];
+    
+    // Show confirmation modal first
+    setConfirmationModal({
+      isOpen: true,
+      title: 'Ayı təmizlə',
+      message: `${monthName} ${currentYear} ayındakı bütün dərslər silinəcək. Bu əməliyyat geri alına bilməz. Davam etmək istəyirsiniz?`,
+      onConfirm: () => performClearMonth(monthIndex)
+    });
+  };
+
+  const performClearMonth = async (monthIndex: number) => {
     try {
       const monthStart = new Date(currentYear, monthIndex, 1, 12, 0, 0);
       const monthEnd = new Date(currentYear, monthIndex + 1, 0, 12, 0, 0);
@@ -1523,6 +1549,17 @@ export default function Calendar({
         title={notificationModal.title}
         message={notificationModal.message}
         type={notificationModal.type}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        onClose={() => setConfirmationModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmationModal.onConfirm}
+        title={confirmationModal.title}
+        message={confirmationModal.message}
+        confirmText="Sil"
+        cancelText="Ləğv et"
       />
     </div>
   );
