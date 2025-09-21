@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Lesson } from "@/types/lesson";
 import { calculatePrice, calculateStudentCount } from "@/types/pricing";
+import { saveLessons } from "@/lib/lessonSync";
 import styles from "./Calendar.module.css";
 import ViewLessonsModal from "./ViewLessonsModal";
 import TemplatesModal from "./TemplatesModal";
@@ -471,6 +472,14 @@ export default function Calendar({
         }
       }
       
+      // Also save to MongoDB
+      try {
+        await saveLessons(filtered);
+        console.log('Successfully saved filtered lessons to MongoDB after clearing month');
+      } catch (error) {
+        console.error('Error saving filtered lessons to MongoDB:', error);
+      }
+      
       
       showNotification(
         "Ay təmizləndi",
@@ -581,6 +590,14 @@ export default function Calendar({
       });
       localStorage.setItem("lessons", JSON.stringify(lessonsByYear));
       
+      // Also save to MongoDB
+      try {
+        console.log('Saving template lessons to MongoDB:', existingLessons.length, 'lessons');
+        await saveLessons(existingLessons);
+        console.log('Successfully saved template lessons to MongoDB');
+      } catch (error) {
+        console.error('Error saving template lessons to MongoDB:', error);
+      }
       
       // Refresh lessons in parent component FIRST
       if (onLessonsUpdate) {
@@ -749,6 +766,14 @@ export default function Calendar({
       });
       localStorage.setItem("lessons", JSON.stringify(lessonsByYear));
       
+      // Also save to MongoDB
+      try {
+        console.log('Saving copyTemplateToMonth lessons to MongoDB:', existingLessons.length, 'lessons');
+        await saveLessons(existingLessons);
+        console.log('Successfully saved copyTemplateToMonth lessons to MongoDB');
+      } catch (error) {
+        console.error('Error saving copyTemplateToMonth lessons to MongoDB:', error);
+      }
 
       // Refresh lessons in parent component FIRST
       if (onLessonsUpdate) {

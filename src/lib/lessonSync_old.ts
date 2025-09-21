@@ -10,18 +10,27 @@ const isValidTemplateLesson = (lesson: any): boolean => {
   return lesson && typeof lesson === 'object';
 };
 
-// Clear corrupted data from localStorage
+// Clean corrupted lesson data (lessons without dates)
 export const clearCorruptedData = async (): Promise<void> => {
+  const userId = getCurrentUserId();
+  
+  if (!userId) {
+    console.warn('No user ID found - cannot clear corrupted data');
+    return;
+  }
+  
   try {
     const response = await fetch('/api/clear-corrupted', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ userId }),
     });
-
+    
     if (response.ok) {
-      console.log('Corrupted data cleared successfully');
+      const result = await response.json();
+      console.log('Corrupted data cleanup result:', result);
     } else {
       console.error('Failed to clear corrupted data:', response.status);
     }
@@ -32,14 +41,18 @@ export const clearCorruptedData = async (): Promise<void> => {
 
 // Get current user ID from localStorage
 export const getCurrentUserId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  
   try {
-    if (typeof window === 'undefined') return null;
-    
     const authUser = localStorage.getItem('authUser');
+    console.log('getCurrentUserId - authUser from localStorage:', authUser);
+    
     if (authUser) {
       const user = JSON.parse(authUser);
-      console.log('getCurrentUserId - found user:', user);
-      return user.id || user.email || null;
+      console.log('getCurrentUserId - parsed user:', user);
+      const userId = user.id || user.email;
+      console.log('getCurrentUserId - returning userId:', userId);
+      return userId; // Use ID if available, otherwise email
     }
   } catch (error) {
     console.error('Error getting user ID:', error);
@@ -51,16 +64,12 @@ export const getCurrentUserId = (): string | null => {
 
 // Save lessons to MongoDB and localStorage
 export const saveLessons = async (lessons: Lesson[]): Promise<void> => {
-  console.log('=== SAVE LESSONS START ===');
-  console.log('Input lessons:', lessons);
-  
   const userId = getCurrentUserId();
   
   console.log('saveLessons called with:', { lessonsCount: lessons.length, userId });
   
   if (!userId) {
     console.error('No user ID found - cannot save lessons to MongoDB');
-    console.log('Saving to localStorage only as fallback');
     // Still save to localStorage as fallback
     const lessonsByYear: { [year: string]: Lesson[] } = {};
     lessons.forEach(lesson => {
@@ -71,27 +80,79 @@ export const saveLessons = async (lessons: Lesson[]): Promise<void> => {
       lessonsByYear[year].push(lesson);
     });
     localStorage.setItem('lessons', JSON.stringify(lessonsByYear));
-    console.log('Saved to localStorage as fallback');
     return;
   }
 
-  // Add teacherId to all lessons - keep it simple
-  const lessonsWithTeacherId = lessons.map(lesson => ({
-    ...lesson,
-    teacherId: userId
-  }));
+  // Add teacherId to all lessons and ENSURE date field is preserved
+  const lessonsWithTeacherId = lessons.map((lesson, index) => {
+    console.log(`=== LESSON ${index + 1} BEFORE ADDING TEACHER ID ===`);
+    console.log('Original lesson:', lesson);
+    console.log('Has date?', !!lesson.date);
+    console.log('Date value:', lesson.date);
+    
+    const lessonWithTeacherId = {
+      id: lesson.id,
+      date: lesson.date, // EXPLICITLY preserve date
+      time: lesson.time,
+      subject: lesson.subject,
+      studentName: lesson.studentName,
+      notes: lesson.notes || '',
+      duration: lesson.duration,
+      teacherId: userId
+    };
+    
+    // TRIPLE CHECK: Force date field if missing
+    if (!lessonWithTeacherId.date && lesson.date) {
+      lessonWithTeacherId.date = lesson.date;
+    }
+    
+    // ABSOLUTE FORCE: Set date field using multiple methods
+    if (lesson.date) {
+      lessonWithTeacherId.date = lesson.date;
+      lessonWithTeacherId['date'] = lesson.date;
+      Object.defineProperty(lessonWithTeacherId, 'date', { 
+        value: lesson.date, 
+        writable: true, 
+        enumerable: true, 
+        configurable: true 
+      });
+    }
+    
+    console.log('After adding teacherId:', lessonWithTeacherId);
+    console.log('Still has date?', !!lessonWithTeacherId.date);
+    console.log('Date value after:', lessonWithTeacherId.date);
+    
+    // DOUBLE CHECK: Force date if it's missing
+    if (!lessonWithTeacherId.date && lesson.date) {
+      lessonWithTeacherId.date = lesson.date;
+      console.log('FORCED date back:', lessonWithTeacherId.date);
+    }
+    
+    return lessonWithTeacherId;
+  });
 
-  console.log('Lessons with teacherId:', lessonsWithTeacherId.length);
+  console.log('=== FINAL LESSONS TO SAVE ===');
+  console.log('Total lessons:', lessonsWithTeacherId.length);
   lessonsWithTeacherId.forEach((lesson, i) => {
-    console.log(`Lesson ${i + 1}:`, { id: lesson.id, date: lesson.date, subject: lesson.subject });
+    console.log(`Lesson ${i + 1}:`, lesson);
   });
 
   try {
-    console.log('Attempting to save to MongoDB...');
-    console.log('Request body:', {
+    // FINAL CHECK before sending to MongoDB
+    console.log('=== FINAL CHECK BEFORE MONGODB ===');
+    lessonsWithTeacherId.forEach((lesson, i) => {
+      console.log(`Final lesson ${i + 1}:`, JSON.stringify(lesson, null, 2));
+      if (!lesson.date) {
+        console.error(`CRITICAL: Lesson ${i + 1} has NO DATE before MongoDB save!`);
+      }
+    });
+    
+    const requestBody = {
       lessons: lessonsWithTeacherId,
       userId: userId
-    });
+    };
+    
+    console.log('Request body being sent to MongoDB:', JSON.stringify(requestBody, null, 2));
     
     // Save to MongoDB
     const response = await fetch('/api/lessons', {
@@ -99,42 +160,54 @@ export const saveLessons = async (lessons: Lesson[]): Promise<void> => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        lessons: lessonsWithTeacherId,
-        userId: userId
-      }),
+      body: JSON.stringify(requestBody),
     });
-
-    console.log('MongoDB response status:', response.status);
-    console.log('MongoDB response ok:', response.ok);
 
     if (!response.ok) {
       const errorData = await response.text();
       console.error('Failed to save lessons to MongoDB:', response.status, errorData);
-      throw new Error(`Failed to save lessons: ${response.status}`);
+      console.error('Request body was:', JSON.stringify({
+        lessons: lessonsWithTeacherId,
+        userId: userId
+      }, null, 2));
     } else {
       const responseData = await response.json();
       console.log('Successfully saved lessons to MongoDB:', responseData);
+      console.log('Saved', lessonsWithTeacherId.length, 'lessons for user', userId);
     }
   } catch (error) {
     console.error('Error saving lessons to MongoDB:', error);
-    throw error;
   }
 
-  // Save to localStorage as backup
+  // Group lessons by year for localStorage backup
   const lessonsByYear: { [year: string]: Lesson[] } = {};
   
-  lessonsWithTeacherId.forEach(lesson => {
-    const year = lesson.date ? lesson.date.split('-')[0] : new Date().getFullYear().toString();
-    if (!lessonsByYear[year]) {
-      lessonsByYear[year] = [];
+  console.log('saveLessons: Processing', lessonsWithTeacherId.length, 'lessons');
+  lessonsWithTeacherId.forEach((lesson, index) => {
+    console.log(`saveLessons: Processing lesson ${index + 1}:`, lesson);
+    
+    try {
+      // Use current year if no date exists
+      const year = lesson.date ? lesson.date.split('-')[0] : new Date().getFullYear().toString();
+      
+      if (!lessonsByYear[year]) {
+        lessonsByYear[year] = [];
+      }
+      lessonsByYear[year].push(lesson);
+    } catch (error) {
+      console.error('Error processing lesson in saveLessons:', lesson, error);
+      // Still add the lesson even if there's an error
+      const currentYear = new Date().getFullYear().toString();
+      if (!lessonsByYear[currentYear]) {
+        lessonsByYear[currentYear] = [];
+      }
+      lessonsByYear[currentYear].push(lesson);
     }
-    lessonsByYear[year].push(lesson);
   });
   
+  // Save to localStorage as backup
   localStorage.setItem('lessons', JSON.stringify(lessonsByYear));
   console.log('Saved lessons to localStorage as backup');
-  console.log('=== SAVE LESSONS END ===');
 };
 
 // Save templates to MongoDB and localStorage
@@ -183,6 +256,8 @@ export const saveTemplates = async (templates: { odd: Lesson[], even: Lesson[] }
   localStorage.setItem('template_even_days', JSON.stringify(templates.even));
   console.log('Saved templates to localStorage as backup');
 };
+
+// No cleanup function - removed all validation
 
 // Load lessons and templates from MongoDB first, then localStorage as fallback
 export const loadUserData = async (): Promise<{ lessons: Lesson[], templates: { odd: Lesson[], even: Lesson[] } }> => {
@@ -233,30 +308,51 @@ export const loadUserData = async (): Promise<{ lessons: Lesson[], templates: { 
         return { lessons: allLessons, templates };
       }
     } catch (error) {
-      console.error('Error loading from MongoDB:', error);
+      console.error('Error loading data from MongoDB:', error);
     }
   }
   
   // Fallback to localStorage
-  console.log('Falling back to localStorage');
+  console.log('Falling back to localStorage for user data');
+  const localLessons = localStorage.getItem('lessons');
+  const localOddTemplates = localStorage.getItem('template_odd_days');
+  const localEvenTemplates = localStorage.getItem('template_even_days');
   
-  const lessonsRaw = typeof window !== "undefined" ? localStorage.getItem("lessons") : null;
-  if (lessonsRaw) {
-    const lessonsData = JSON.parse(lessonsRaw);
-    if (typeof lessonsData === 'object' && !Array.isArray(lessonsData)) {
-      // New format: organized by year
-      allLessons = Object.values(lessonsData).flat() as Lesson[];
-    } else {
-      // Old format: flat array
-      allLessons = lessonsData;
+  // Convert lessons by year back to flat array
+  if (localLessons) {
+    try {
+      const lessonsData = JSON.parse(localLessons);
+      if (typeof lessonsData === 'object' && !Array.isArray(lessonsData)) {
+        // New format: organized by year
+        const flatLessons = Object.values(lessonsData).flat();
+        console.log('localStorage fallback: loaded lessons:', flatLessons.length);
+        allLessons = flatLessons as Lesson[];
+      } else {
+        // Old format: flat array (backward compatibility)
+        console.log('localStorage fallback: old format lessons:', (lessonsData || []).length);
+        allLessons = lessonsData || [];
+      }
+    } catch (error) {
+      console.error('Error parsing lessons from localStorage:', error);
+      allLessons = [];
     }
   }
   
-  const oddTemplatesRaw = typeof window !== "undefined" ? localStorage.getItem("template_odd_days") : null;
-  const evenTemplatesRaw = typeof window !== "undefined" ? localStorage.getItem("template_even_days") : null;
+  // Parse templates and validate
+  let oddTemplates: Lesson[] = [];
+  let evenTemplates: Lesson[] = [];
   
-  const oddTemplates = oddTemplatesRaw ? JSON.parse(oddTemplatesRaw) : [];
-  const evenTemplates = evenTemplatesRaw ? JSON.parse(evenTemplatesRaw) : [];
+  try {
+    oddTemplates = localOddTemplates ? JSON.parse(localOddTemplates) : [];
+  } catch (error) {
+    console.error('Error parsing odd templates from localStorage:', error);
+  }
+  
+  try {
+    evenTemplates = localEvenTemplates ? JSON.parse(localEvenTemplates) : [];
+  } catch (error) {
+    console.error('Error parsing even templates from localStorage:', error);
+  }
   
   return {
     lessons: allLessons,
@@ -332,14 +428,16 @@ export const loadLessons = async (): Promise<Lesson[]> => {
 export const deleteLesson = async (lessonId: string): Promise<void> => {
   console.log('deleteLesson - using localStorage only');
   
-  const lessonsRaw = typeof window !== "undefined" ? localStorage.getItem("lessons") : null;
-  if (lessonsRaw) {
-    const lessonsData = JSON.parse(lessonsRaw);
+  // Update localStorage
+  const localLessons = localStorage.getItem('lessons');
+  if (localLessons) {
+    const lessonsData = JSON.parse(localLessons);
+    
     if (typeof lessonsData === 'object' && !Array.isArray(lessonsData)) {
       // New format: organized by year
       const lessonsByYear: { [year: string]: Lesson[] } = lessonsData;
       Object.keys(lessonsByYear).forEach(year => {
-        lessonsByYear[year] = lessonsByYear[year].filter(lesson => 
+        lessonsByYear[year] = lessonsByYear[year].filter((lesson: Lesson) => 
           lesson && lesson.id && lesson.id !== lessonId
         );
       });

@@ -1,0 +1,291 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+  color: #333;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: #e9ecef;
+  border: none;
+  color: #6c757d;
+  font-size: 1.25rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background: #dee2e6;
+}
+
+.content {
+  padding: 20px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summaryCard {
+  background: #f8f9fa;
+  color: #333;
+  padding: 16px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid #e9ecef;
+}
+
+.summaryValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #007bff;
+}
+
+.summaryLabel {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.section h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.studentsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studentTag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid #bbdefb;
+}
+
+.subjectsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.subjectCard {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.subjectHeader {
+  margin-bottom: 16px;
+}
+
+.subjectHeader h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 8px;
+}
+
+.studentGroupCard {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.groupTitle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.studentCount {
+  background: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.lessonCount {
+  color: #6c757d;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.groupTotal {
+  font-weight: 600;
+  color: #28a745;
+  font-size: 0.9rem;
+}
+
+.groupStudents {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.lessonsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lessonItem {
+  display: grid;
+  grid-template-columns: 50px 50px 1fr;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+  padding: 6px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.moreIndicator {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 6px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.moreIndicator:hover {
+  background-color: #e9ecef;
+  color: #007bff;
+  font-weight: 500;
+}
+
+.date {
+  background: #ebf8ff;
+  color: #2b6cb0;
+  border: 1px solid #bee3f8;
+}
+
+.time {
+  background: #faf5ff;
+  color: #553c9a;
+  border: 1px solid #e9d8fd;
+}
+
+.subject {
+  background: #f0fff4;
+  color: #276749;
+  border: 1px solid #c6f6d5;
+}
+
+.students {
+  background: #fffbeb;
+  color: #c05621;
+  border: 1px solid #fbd38d;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .modal {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .content {
+    padding: 16px;
+  }
+  
+  .header {
+    padding: 16px;
+  }
+  
+  .header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .summaryValue {
+    font-size: 1.25rem;
+  }
+  
+  .groupHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .lessonItem {
+    grid-template-columns: 40px 40px 1fr;
+    gap: 6px;
+    font-size: 0.75rem;
+  }
+}

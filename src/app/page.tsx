@@ -9,6 +9,7 @@ import {
   loadLessons,
   deleteLesson,
   clearDayLessons,
+  saveLessons,
 } from "../lib/lessonSync";
 import styles from "./page.module.css";
 
@@ -71,6 +72,15 @@ export default function Home() {
     
     setLessons(newLessons);
     
+    // Save to MongoDB and localStorage
+    try {
+      console.log('About to call saveLessons with:', newLessons);
+      await saveLessons(newLessons);
+      console.log('Successfully saved lessons to MongoDB and localStorage');
+    } catch (error) {
+      console.error('Error saving lessons:', error);
+      alert('Dərs saxlanıldı, amma serverə göndərilmədi. Yenidən cəhd edin.');
+    }
     
     setIsModalOpen(false);
   };
@@ -78,7 +88,16 @@ export default function Home() {
   const handleDeleteLesson = async (lessonId: string) => {
     const newLessons = lessons.filter((lesson) => lesson.id !== lessonId);
     setLessons(newLessons);
-    await deleteLesson(lessonId);
+    
+    // Save updated lessons to MongoDB and localStorage
+    try {
+      await saveLessons(newLessons);
+      await deleteLesson(lessonId);
+      console.log('Successfully deleted lesson from MongoDB and localStorage');
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      alert('Dərs silindi, amma serverdə xəta baş verdi. Yenidən cəhd edin.');
+    }
   };
 
   const handleClearDay = async (date: Date) => {
@@ -88,17 +107,30 @@ export default function Home() {
     const dateStr = `${yyyy}-${mm}-${dd}`;
     const newLessons = lessons.filter((lesson) => lesson.date !== dateStr);
     setLessons(newLessons);
-    await clearDayLessons(date);
+    
+    // Save updated lessons to MongoDB and localStorage
+    try {
+      await saveLessons(newLessons);
+      await clearDayLessons(date);
+      console.log('Successfully cleared day lessons from MongoDB and localStorage');
+    } catch (error) {
+      console.error('Error clearing day lessons:', error);
+      alert('Günün dərsləri silindi, amma serverdə xəta baş verdi. Yenidən cəhd edin.');
+    }
   };
 
   const handleLessonsUpdate = async () => {
     try {
+      console.log('=== HANDLE LESSONS UPDATE START ===');
       const lessonsData = await loadLessons();
+      console.log('Loaded lessons from loadLessons:', lessonsData.length);
       
       // Filter lessons for 2025 to see how many we have
       const lessons2025 = lessonsData.filter(lesson => lesson.date?.startsWith('2025'));
+      console.log('Lessons for 2025:', lessons2025.length);
       
       setLessons(lessonsData);
+      console.log('=== HANDLE LESSONS UPDATE END ===');
     } catch (error) {
       console.error("Error refreshing lessons:", error);
       // Fallback to localStorage only

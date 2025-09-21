@@ -38,13 +38,18 @@ export async function GET(request: NextRequest) {
 // POST - Save lessons and templates for a user
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== API ROUTE START ===');
     await connectToDatabase();
     
-    const { lessons, templates, userId } = await request.json();
+    const requestBody = await request.json();
+    console.log('Raw request body:', requestBody);
+    
+    const { lessons, templates, userId } = requestBody;
     
     console.log('=== API ROUTE DEBUG ===');
     console.log('Received userId:', userId);
     console.log('Received lessons count:', lessons?.length || 0);
+    console.log('Received templates:', templates);
     
     if (lessons && lessons.length > 0) {
       console.log('First lesson received:', lessons[0]);
@@ -109,12 +114,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    console.log('=== API ROUTE SUCCESS ===');
+    console.log('Saved user data successfully');
+    
     return NextResponse.json({ 
       message: 'Data saved successfully',
       lessons: user.lessons,
       templates: user.templates
     });
   } catch (error) {
+    console.error('=== API ROUTE ERROR ===');
     console.error('Error saving user data:', error);
     return NextResponse.json({ error: 'Failed to save user data' }, { status: 500 });
   }

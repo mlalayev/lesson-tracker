@@ -51,16 +51,12 @@ export const getCurrentUserId = (): string | null => {
 
 // Save lessons to MongoDB and localStorage
 export const saveLessons = async (lessons: Lesson[]): Promise<void> => {
-  console.log('=== SAVE LESSONS START ===');
-  console.log('Input lessons:', lessons);
-  
   const userId = getCurrentUserId();
   
   console.log('saveLessons called with:', { lessonsCount: lessons.length, userId });
   
   if (!userId) {
     console.error('No user ID found - cannot save lessons to MongoDB');
-    console.log('Saving to localStorage only as fallback');
     // Still save to localStorage as fallback
     const lessonsByYear: { [year: string]: Lesson[] } = {};
     lessons.forEach(lesson => {
@@ -71,7 +67,6 @@ export const saveLessons = async (lessons: Lesson[]): Promise<void> => {
       lessonsByYear[year].push(lesson);
     });
     localStorage.setItem('lessons', JSON.stringify(lessonsByYear));
-    console.log('Saved to localStorage as fallback');
     return;
   }
 
@@ -87,12 +82,6 @@ export const saveLessons = async (lessons: Lesson[]): Promise<void> => {
   });
 
   try {
-    console.log('Attempting to save to MongoDB...');
-    console.log('Request body:', {
-      lessons: lessonsWithTeacherId,
-      userId: userId
-    });
-    
     // Save to MongoDB
     const response = await fetch('/api/lessons', {
       method: 'POST',
@@ -105,16 +94,12 @@ export const saveLessons = async (lessons: Lesson[]): Promise<void> => {
       }),
     });
 
-    console.log('MongoDB response status:', response.status);
-    console.log('MongoDB response ok:', response.ok);
-
     if (!response.ok) {
       const errorData = await response.text();
       console.error('Failed to save lessons to MongoDB:', response.status, errorData);
       throw new Error(`Failed to save lessons: ${response.status}`);
     } else {
-      const responseData = await response.json();
-      console.log('Successfully saved lessons to MongoDB:', responseData);
+      console.log('Successfully saved lessons to MongoDB');
     }
   } catch (error) {
     console.error('Error saving lessons to MongoDB:', error);
@@ -134,7 +119,6 @@ export const saveLessons = async (lessons: Lesson[]): Promise<void> => {
   
   localStorage.setItem('lessons', JSON.stringify(lessonsByYear));
   console.log('Saved lessons to localStorage as backup');
-  console.log('=== SAVE LESSONS END ===');
 };
 
 // Save templates to MongoDB and localStorage
