@@ -70,14 +70,52 @@ export function calculateStudentCount(studentNames: string): number {
 }
 
 // Fənn üçün qiymət hesablamaq üçün funksiya
-export function calculatePrice(subject: string, studentCount: number): number {
+export function calculatePrice(subject: string, studentCount: number, teacherId?: string): number {
+  // Əgər teacherId varsa, localStorage-dən fərdi tarifləri yoxla
+  if (teacherId && typeof window !== 'undefined') {
+    const teacherKey = `teacher_pricing_${teacherId}`;
+    const savedPricing = localStorage.getItem(teacherKey);
+    
+    if (savedPricing) {
+      try {
+        const teacherPricing: Record<string, PricingTier[]> = JSON.parse(savedPricing);
+        const subjectTiers = teacherPricing[subject];
+        
+        if (subjectTiers && subjectTiers.length > 0) {
+          // Tələbə sayına uyğun qiymət tap
+          let selectedTier = subjectTiers[0]; // Default
+          
+          for (const tier of subjectTiers) {
+            if (studentCount >= tier.minStudents) {
+              selectedTier = tier;
+            } else {
+              break;
+            }
+          }
+          
+          console.log(`Using custom pricing for teacher ${teacherId}, subject ${subject}, ${studentCount} students: ${selectedTier.price} AZN`);
+          return selectedTier.price;
+        } else {
+          console.log(`No custom pricing found for teacher ${teacherId}, subject ${subject}, using default`);
+        }
+      } catch (error) {
+        console.error('Error parsing teacher pricing:', error);
+      }
+    } else {
+      console.log(`No saved pricing found for teacher ${teacherId}, using default`);
+    }
+  }
+  
+  // Default pricing istifadə et
   const subjectPricing = PRICING_CONFIG.find(config => 
     config.subject.toLowerCase() === subject.toLowerCase()
   );
   
   if (!subjectPricing) {
     // Digər fənlər üçün default qiymət
-    return studentCount * 5; // Hər tələbə üçün 5 manat
+    const defaultPrice = studentCount * 5; // Hər tələbə üçün 5 manat
+    console.log(`Using default pricing for unknown subject ${subject}, ${studentCount} students: ${defaultPrice} AZN`);
+    return defaultPrice;
   }
   
   // Tələbə sayına uyğun qiymət tap
@@ -91,6 +129,26 @@ export function calculatePrice(subject: string, studentCount: number): number {
     }
   }
   
+  console.log(`Using default pricing for subject ${subject}, ${studentCount} students: ${selectedTier.price} AZN`);
   return selectedTier.price;
+}
+
+// Müəllimin fərdi tariflərini localStorage-dən yüklə
+export function getTeacherPricing(teacherId: string): Record<string, PricingTier[]> | null {
+  if (typeof window === 'undefined') return null;
+  
+  const teacherKey = `teacher_pricing_${teacherId}`;
+  const savedPricing = localStorage.getItem(teacherKey);
+  
+  if (savedPricing) {
+    try {
+      return JSON.parse(savedPricing);
+    } catch (error) {
+      console.error('Error parsing teacher pricing:', error);
+      return null;
+    }
+  }
+  
+  return null;
 }
 

@@ -33,10 +33,10 @@ export default function TeacherDetailsModal({
   if (!isOpen || !teacher) return null;
 
 
-  // Calculate total salary
+  // Calculate total salary using teacher's custom pricing
   const totalSalary = lessons.reduce((sum, lesson) => {
     const studentCount = calculateStudentCount(lesson.studentName);
-    return sum + calculatePrice(lesson.subject, studentCount);
+    return sum + calculatePrice(lesson.subject, studentCount, teacher.id);
   }, 0);
 
   // Get unique students
@@ -124,7 +124,7 @@ export default function TeacherDetailsModal({
                       .sort(([a], [b]) => parseInt(a) - parseInt(b))
                       .map(([studentCount, subjectLessons]) => {
                         const groupPrice = subjectLessons.reduce((sum, lesson) => {
-                          return sum + calculatePrice(lesson.subject, parseInt(studentCount));
+                          return sum + calculatePrice(lesson.subject, parseInt(studentCount), teacher.id);
                         }, 0);
                         
                         const allStudents = new Set<string>();

@@ -1,0 +1,313 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: #e9ecef;
+  border: none;
+  color: #6c757d;
+  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background: #dee2e6;
+}
+
+.content {
+  padding: 24px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.summaryCard {
+  background: #f8f9fa;
+  color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+}
+
+.summaryValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #030460;
+}
+
+.summaryLabel {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.pricingSection h3 {
+  margin: 0 0 20px 0;
+  color: #030460;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.subjectsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.subjectCard {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.subjectHeader {
+  margin-bottom: 16px;
+}
+
+.subjectHeader h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 8px;
+}
+
+.tiersList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tierCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.tierCard:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.tierInfo {
+  display: flex;
+  align-items: center;
+}
+
+.studentCount {
+  background: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.priceInput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.priceField {
+  width: 90px;
+  padding: 8px 10px;
+  border: 2px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-align: right;
+  font-weight: 600;
+  background-color: white;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.priceField:hover {
+  border-color: #007bff;
+  background-color: #f8f9fa;
+}
+
+.priceField:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  background-color: white;
+  color: #333;
+}
+
+.priceField::placeholder {
+  color: #999;
+}
+
+.currency {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #28a745;
+  background-color: #d4edda;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #c3e6cb;
+}
+
+.footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancelButton, .saveButton {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.cancelButton {
+  background-color: #e9ecef;
+  color: #333;
+  border: 1px solid #ced4da;
+}
+
+.cancelButton:hover {
+  background-color: #dee2e6;
+}
+
+.saveButton {
+  background-color: #28a745;
+  color: white;
+  border: 1px solid #28a745;
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.saveButton:disabled {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .modal {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .header {
+    padding: 12px 16px;
+  }
+
+  .header h2 {
+    font-size: 1.1rem;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryValue {
+    font-size: 1.5rem;
+  }
+
+  .lessonsSection h3 {
+    font-size: 1.1rem;
+  }
+
+  .tierCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tierInfo {
+    align-self: flex-start;
+  }
+
+  .priceInput {
+    align-self: flex-end;
+  }
+
+  .footer {
+    padding: 12px 16px;
+  }
+
+  .cancelButton, .saveButton {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+}

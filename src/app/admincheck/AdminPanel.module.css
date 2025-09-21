@@ -51,6 +51,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
 .teacherCard:hover {
@@ -94,6 +95,52 @@
   color: #030460;
   font-weight: 500;
   font-size: 0.75rem;
+}
+
+.customPricing {
+  color: #28a745 !important;
+  font-weight: 600;
+  font-size: 0.7rem;
+  background: #d4edda;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 0;
+  text-align: center;
+}
+
+.defaultPricing {
+  color: #6c757d !important;
+  font-weight: 500;
+  font-size: 0.7rem;
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 0;
+  text-align: center;
+}
+
+/* Teacher Actions */
+.teacherActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewProfileButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.viewProfileButton:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
 }
 
 /* Teacher Details */
@@ -360,6 +407,25 @@
   
   .monthsGrid {
     grid-template-columns: 1fr;
+  }
+  
+  .teacherCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .teacherStats {
+    align-items: flex-start;
+  }
+  
+  .teacherActions {
+    align-self: stretch;
+  }
+  
+  .viewProfileButton {
+    width: 100%;
+    text-align: center;
   }
   
   .lessonInfo {
