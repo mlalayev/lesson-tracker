@@ -16,13 +16,14 @@
 .container {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 850px;
   max-height: 85vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 1px solid #e5e7eb;
 }
 
 .header {
@@ -103,21 +104,21 @@
 
 .lessonsHeader {
   padding: 16px 20px 12px 20px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .lessonsTitle {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
 .titleIndicator {
-  width: 2px;
+  width: 3px;
   height: 12px;
   background: #007bff;
   border-radius: 2px;
@@ -126,23 +127,25 @@
 .lessonsGrid {
   display: flex !important;
   flex-direction: column !important;
+  padding: 16px 20px;
+  gap: 8px;
 }
 
 .lessonCard {
-  border-bottom: 1px solid #e5e7eb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
   padding: 12px 16px;
   transition: background-color 0.2s ease;
   width: 100% !important;
   max-width: none !important;
+  background: #ffffff;
 }
 
 .lessonCard:hover {
   background: #f8f9fa;
 }
 
-.lessonCard:last-child {
-  border-bottom: none;
-}
+
 
 .lessonHeader {
   display: flex;

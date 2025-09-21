@@ -18,6 +18,7 @@ interface TeacherDetailsModalProps {
   lessons: Lesson[];
   monthName: string;
   year: number;
+  onOpenPricing?: () => void;
 }
 
 export default function TeacherDetailsModal({
@@ -26,7 +27,8 @@ export default function TeacherDetailsModal({
   teacher,
   lessons,
   monthName,
-  year
+  year,
+  onOpenPricing
 }: TeacherDetailsModalProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   
@@ -50,10 +52,22 @@ export default function TeacherDetailsModal({
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>{teacher.name} - {monthName} {year}</h2>
-          <button className={styles.closeButton} onClick={onClose}>
-            ×
-          </button>
+          <div className={styles.headerLeft}>
+            <h2>{teacher.name} - {monthName} {year}</h2>
+          </div>
+          <div className={styles.headerRight}>
+            {onOpenPricing && (
+              <button 
+                className={styles.pricingButton}
+                onClick={onOpenPricing}
+              >
+                Maaş Təyin Et
+              </button>
+            )}
+            <button className={styles.closeButton} onClick={onClose}>
+              ×
+            </button>
+          </div>
         </div>
 
         <div className={styles.content}>

@@ -971,12 +971,12 @@ export default function Calendar({
                         ? styles.calendarDayWithLessons
                         : "",
                       isSalaryPeriod ? styles.calendarDaySalaryPeriod : "",
-                      // Sunday highlight
+                      // Sunday highlight (yellow)
                       weekday === 0 ? styles.calendarDaySunday : "",
-                      // Mon(1), Wed(3), Fri(5) highlight
-                      weekday === 1 || weekday === 3 || weekday === 5
-                        ? styles.calendarDayMonWedFri
-                        : "",
+                      // Monday, Wednesday, Friday (light gray)
+                      weekday === 1 || weekday === 3 || weekday === 5 ? styles.calendarDayMonWedFri : "",
+                      // Tuesday, Thursday, Saturday (darker gray)
+                      weekday === 2 || weekday === 4 || weekday === 6 ? styles.calendarDayTueThuSat : "",
                     ]
                       .filter(Boolean)
                       .join(" ");

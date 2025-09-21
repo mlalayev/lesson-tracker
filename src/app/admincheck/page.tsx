@@ -134,20 +134,39 @@ export default function AdminPanel() {
     }
   };
 
-  // View Profile düyməsinə vuranda - pricing modal aç
+  // View Profile düyməsinə vuranda - teacher details modal aç
   const handleViewProfile = async (teacher: Teacher, event: React.MouseEvent) => {
     event.stopPropagation(); // Parent click event-ini dayandır
     
-    // Cari ayı avtomatik seç
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1;
-    
-    // Pricing modal məlumatlarını təyin et
-    setPricingModalTeacher(teacher);
-    setPricingModalMonthName(getMonthName(currentMonth));
-    setPricingModalYear(currentYear);
-    setIsPricingModalOpen(true);
+    try {
+      // MongoDB-dən müəllimin dərslərini yüklə
+      const lessonsResponse = await fetch(`/api/lessons?userId=${teacher.id}`);
+      if (lessonsResponse.ok) {
+        const lessonsData = await lessonsResponse.json();
+        const allLessons = lessonsData.lessons;
+        
+        // Cari ayı avtomatik seç
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+        
+        // Cari ayın dərslərini tap
+        const currentMonthLessons = allLessons.filter((lesson: any) => {
+          if (!lesson.date) return false;
+          const [year, month] = lesson.date.split('-');
+          return parseInt(year) === currentYear && parseInt(month) === currentMonth;
+        });
+        
+        // Modal məlumatlarını təyin et
+        setModalTeacher(teacher);
+        setModalLessons(currentMonthLessons);
+        setModalMonthName(getMonthName(currentMonth));
+        setModalYear(currentYear);
+        setIsModalOpen(true);
+      }
+    } catch (error) {
+      console.error('Error loading teacher lessons:', error);
+    }
   };
 
   // Pricing məlumatlarını saxla
@@ -228,6 +247,15 @@ export default function AdminPanel() {
         lessons={modalLessons}
         monthName={modalMonthName}
         year={modalYear}
+        onOpenPricing={() => {
+          if (modalTeacher) {
+            setPricingModalTeacher(modalTeacher);
+            setPricingModalMonthName(modalMonthName);
+            setPricingModalYear(modalYear);
+            setIsModalOpen(false);
+            setIsPricingModalOpen(true);
+          }
+        }}
       />
 
       {/* Teacher Pricing Modal */}
