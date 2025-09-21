@@ -211,9 +211,17 @@ export default function TemplatesModal({ templateType, onClose }: TemplatesModal
                 <div key={item.id} className={styles.lessonItem}>
                   <div className={styles.lessonInfo}>
                     <div className={styles.lessonTime}>{item.time}</div>
-                    <div className={styles.lessonSubject}>{item.subject}</div>
-                    <div className={styles.lessonStudent}>{item.studentName}</div>
-                    {item.notes && <div className={styles.lessonNotes}>{item.notes}</div>}
+                    <div className={styles.lessonDetails}>
+                      <div className={styles.lessonSubject}>{item.subject}</div>
+                      <div className={styles.lessonStudent}>{item.studentName}</div>
+                      {item.notes && <div className={styles.lessonNotes}>{item.notes}</div>}
+                    </div>
+                  </div>
+                  <div className={styles.lessonMeta}>
+                    <div className={styles.lessonDuration}>{item.duration} dəq</div>
+                    <div className={styles.lessonPrice}>
+                      {calculatePrice(item.subject, calculateStudentCount(item.studentName))} AZN
+                    </div>
                   </div>
                   <div className={styles.lessonActions}>
                     <button className={styles.editButton} onClick={() => handleEdit(item)}>

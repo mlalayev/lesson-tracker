@@ -6,6 +6,8 @@ import { calculatePrice, calculateStudentCount } from "@/types/pricing";
 import styles from "./Calendar.module.css";
 import ViewLessonsModal from "./ViewLessonsModal";
 import TemplatesModal from "./TemplatesModal";
+import SalaryModal from "./SalaryModal";
+import NotificationModal from "./NotificationModal";
 
 interface CalendarProps {
   lessons: Lesson[];
@@ -48,6 +50,25 @@ export default function Calendar({
   const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
   const [pendingTemplateType, setPendingTemplateType] = useState<"odd" | "even" | null>(null);
   const [templatesRefreshKey, setTemplatesRefreshKey] = useState(0);
+  const [isSalaryModalOpen, setIsSalaryModalOpen] = useState(false);
+  const [salaryModalData, setSalaryModalData] = useState<{
+    lessons: Lesson[];
+    monthName: string;
+    year: number;
+  } | null>(null);
+  
+  // Notification modal state
+  const [notificationModal, setNotificationModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info'
+  });
   
   // Client-side only state for template existence
   const [templatesStatus, setTemplatesStatus] = useState<{
@@ -288,6 +309,19 @@ export default function Calendar({
     setCurrentYear(new Date().getFullYear());
   };
 
+  const showNotification = (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setNotificationModal({
+      isOpen: true,
+      title,
+      message,
+      type
+    });
+  };
+
+  const closeNotification = () => {
+    setNotificationModal(prev => ({ ...prev, isOpen: false }));
+  };
+
   const calculateMonthlySalary = (monthIndex: number) => {
     // Maaş dövrü: ayın 1-dən ayın son gününə qədər
     const salaryStartDate = new Date(currentYear, monthIndex, 1, 12, 0, 0);
@@ -298,28 +332,13 @@ export default function Calendar({
       return lessonDate >= salaryStartDate && lessonDate <= salaryEndDate;
     });
 
-    let totalSalary = 0;
-
-    monthLessons.forEach((lesson) => {
-      const studentCount = calculateStudentCount(lesson.studentName);
-      const lessonPrice = calculatePrice(lesson.subject, studentCount);
-      totalSalary += lessonPrice;
+    // Open the detailed salary modal
+    setSalaryModalData({
+      lessons: monthLessons,
+      monthName: months[monthIndex],
+      year: currentYear
     });
-
-    const startDateStr = `${salaryStartDate.getDate()}.${(
-      salaryStartDate.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}`;
-    const endDateStr = `${salaryEndDate.getDate()}.${(
-      salaryEndDate.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}`;
-
-    alert(
-      `${months[monthIndex]} ${currentYear} maaşı\n(${startDateStr} - ${endDateStr})\n\nÜmumi maaş: ${totalSalary} AZN\nDərs sayı: ${monthLessons.length}`
-    );
+    setIsSalaryModalOpen(true);
   };
 
   const handleClearDay = async (date: Date) => {
@@ -427,7 +446,11 @@ export default function Calendar({
       }
       
       
-      alert(`Cleared all lessons in ${months[monthIndex]} ${currentYear}.`);
+      showNotification(
+        "Ay təmizləndi",
+        `${months[monthIndex]} ${currentYear} ayındakı bütün dərslər silindi.`,
+        'success'
+      );
       
       // Refresh lessons in parent component
       if (onLessonsUpdate) {
@@ -472,7 +495,11 @@ export default function Calendar({
       console.log(`handleApplyTemplateToSelectedDays - template: ${pendingTemplateType}, loaded templateLessons:`, templateLessons);
       
       if (!templateLessons || templateLessons.length === 0) {
-        alert(`No ${pendingTemplateType} template lessons found. Please create template lessons first by going to Templates menu and adding lessons to the ${pendingTemplateType} template.`);
+        showNotification(
+          "Template tapılmadı",
+          `${pendingTemplateType} template dərsləri tapılmadı. Əvvəlcə Templates menyusuna gedərək ${pendingTemplateType} template-ə dərslər əlavə edin.`,
+          'error'
+        );
         return;
       }
 
@@ -537,7 +564,11 @@ export default function Calendar({
       // Refresh template status after successful operation
       setTemplatesRefreshKey(prev => prev + 1);
       
-      alert(`Added ${addedCount} lessons to selected days.`);
+      showNotification(
+        "Template tətbiq edildi",
+        `Seçilmiş günlərə ${addedCount} dərs əlavə edildi.`,
+        'success'
+      );
       
       // Fallback reload if no callback provided
       if (!onLessonsUpdate) {
@@ -545,7 +576,11 @@ export default function Calendar({
       }
     } catch (e) {
       console.error(e);
-      alert("Failed to apply template to selected days.");
+      showNotification(
+        "Xəta",
+        "Template seçilmiş günlərə tətbiq edilə bilmədi.",
+        'error'
+      );
       
       // Refresh template status even on error to ensure UI is up to date
       setTemplatesRefreshKey(prev => prev + 1);
@@ -583,7 +618,11 @@ export default function Calendar({
       
       if (!templateLessons || templateLessons.length === 0) {
         console.log(`❌ No template lessons found for ${template}`);
-        alert(`No ${template} template lessons found. Please create template lessons first by going to Templates menu and adding lessons to the ${template} template.`);
+        showNotification(
+          "Template tapılmadı",
+          `${template} template dərsləri tapılmadı. Əvvəlcə Templates menyusuna gedərək ${template} template-ə dərslər əlavə edin.`,
+          'error'
+        );
         // Refresh template status to reflect current state
         setTemplatesRefreshKey(prev => prev + 1);
         return;
@@ -665,7 +704,11 @@ export default function Calendar({
       
 
       if (addedCount === 0) {
-        alert(`No lessons were added. All ${template} days in ${months[monthIndex]} already have lessons, or no ${template} days exist in this month.`);
+        showNotification(
+          "Dərs əlavə edilmədi",
+          `${months[monthIndex]} ayındakı bütün ${template} günlər artıq dərslərə malikdir, və ya bu ayda ${template} günlər mövcud deyil.`,
+          'info'
+        );
         return;
       }
 
@@ -689,8 +732,10 @@ export default function Calendar({
       // Refresh template status after successful operation
       setTemplatesRefreshKey(prev => prev + 1);
       
-      alert(
-        `Added ${addedCount} lessons to ${months[monthIndex]} ${currentYear}.`
+      showNotification(
+        "Template tətbiq edildi",
+        `${months[monthIndex]} ${currentYear} ayına ${addedCount} dərs əlavə edildi.`,
+        'success'
       );
       
       // Fallback reload if no callback provided
@@ -699,7 +744,11 @@ export default function Calendar({
       }
     } catch (e) {
       console.error(e);
-      alert("Failed to copy template to month.");
+      showNotification(
+        "Xəta",
+        "Template aya kopyalanmadı.",
+        'error'
+      );
       
       // Refresh template status even on error to ensure UI is up to date
       setTemplatesRefreshKey(prev => prev + 1);
@@ -1452,6 +1501,29 @@ export default function Calendar({
           }}
         />
       )}
+
+      {/* Salary Modal */}
+      {isSalaryModalOpen && salaryModalData && (
+        <SalaryModal
+          isOpen={isSalaryModalOpen}
+          onClose={() => {
+            setIsSalaryModalOpen(false);
+            setSalaryModalData(null);
+          }}
+          lessons={salaryModalData.lessons}
+          monthName={salaryModalData.monthName}
+          year={salaryModalData.year}
+        />
+      )}
+
+      {/* Notification Modal */}
+      <NotificationModal
+        isOpen={notificationModal.isOpen}
+        onClose={closeNotification}
+        title={notificationModal.title}
+        message={notificationModal.message}
+        type={notificationModal.type}
+      />
     </div>
   );
 }
