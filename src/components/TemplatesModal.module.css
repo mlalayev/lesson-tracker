@@ -1,36 +1,23 @@
-/* TemplatesModal - Minimalistic Single Column Design */
+/* TemplatesModal - Clean Minimalistic Design */
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
   z-index: 60;
-  backdrop-filter: blur(2px);
 }
 
 .container {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  max-width: 750px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
   width: 100%;
   max-height: 85vh;
   overflow: hidden;
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 .header {
@@ -39,7 +26,7 @@
   justify-content: space-between;
   padding: 20px 24px;
   border-bottom: 1px solid #e5e7eb;
-  background: #fafbfc;
+  background: #fafafa;
 }
 
 .headerActions {
@@ -51,7 +38,7 @@
 .title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #333;
   margin: 0;
 }
 
@@ -114,18 +101,18 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #3b82f6;
+  background: #007bff;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.2s ease;
 }
 
 .addButton:hover {
-  background: #2563eb;
+  background: #0056b3;
 }
 
 .lessonsList {
@@ -138,14 +125,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 16px 20px;
   background: white;
-  border-bottom: 1px solid #f1f5f9;
-  transition: background-color 0.15s ease;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
 }
 
 .lessonItem:hover {
-  background: #fafbfc;
+  background: #f8f9fa;
 }
 
 .lessonItem:last-child {
@@ -162,11 +149,11 @@
 
 .lessonTime {
   font-weight: 600;
-  color: #3b82f6;
-  font-size: 1rem;
-  font-family: 'Courier New', monospace;
+  color: #007bff;
+  font-size: 0.9rem;
+  font-family: monospace;
   flex-shrink: 0;
-  min-width: 60px;
+  min-width: 50px;
 }
 
 .lessonDetails {
@@ -179,13 +166,13 @@
 
 .lessonSubject {
   font-weight: 600;
-  color: #1f2937;
-  font-size: 1rem;
+  color: #333;
+  font-size: 0.95rem;
 }
 
 .lessonStudent {
-  color: #6b7280;
-  font-size: 0.875rem;
+  color: #666;
+  font-size: 0.85rem;
   font-weight: 400;
   word-break: break-word;
 }
@@ -211,11 +198,12 @@
 }
 
 .lessonPrice {
-  color: #059669;
+  color: #28a745;
   font-weight: 600;
-  background: #d1fae5;
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: #e8f5e8;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.85rem;
 }
 
 .lessonActions {
@@ -230,33 +218,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  border: 1px solid #e5e7eb;
+  width: 26px;
+  height: 26px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
   background: white;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .editButton {
-  color: #6b7280;
+  color: #666;
 }
 
 .editButton:hover {
-  color: #3b82f6;
-  border-color: #3b82f6;
-  background: #f0f9ff;
+  color: #007bff;
+  border-color: #007bff;
+  background: #f0f8ff;
 }
 
 .deleteButton {
-  color: #6b7280;
+  color: #666;
 }
 
 .deleteButton:hover {
-  color: #ef4444;
-  border-color: #ef4444;
-  background: #fef2f2;
+  color: #dc3545;
+  border-color: #dc3545;
+  background: #fff5f5;
 }
 
 .emptyState {

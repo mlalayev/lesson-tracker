@@ -4,22 +4,21 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
 }
 
 .modal {
   background: white;
   border-radius: 8px;
   width: 90%;
-  max-width: 1000px;
-  max-height: 90vh;
+  max-width: 900px;
+  max-height: 85vh;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
 }
@@ -28,15 +27,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 24px;
+  padding: 20px 24px;
   border-bottom: 1px solid #e5e7eb;
-  background-color: #f8f9fa;
+  background-color: #fafafa;
   color: #333;
 }
 
 .header h2 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
@@ -115,19 +114,20 @@
   border: 1px solid #e9ecef;
   border-radius: 6px;
   padding: 16px;
+  margin-bottom: 16px;
 }
 
 .subjectHeader {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .subjectHeader h4 {
   margin: 0;
   color: #333;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
 }
 
 .tiersList {
@@ -142,14 +142,13 @@
   align-items: center;
   background: white;
   border: 1px solid #e9ecef;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 12px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .tierCard:hover {
-  border-color: #007bff;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+  background: #f8f9fa;
 }
 
 .tierInfo {
@@ -160,9 +159,9 @@
 .studentCount {
   background: #007bff;
   color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
@@ -173,29 +172,26 @@
 }
 
 .priceField {
-  width: 90px;
-  padding: 8px 10px;
-  border: 2px solid #ced4da;
-  border-radius: 6px;
-  font-size: 1rem;
+  width: 80px;
+  padding: 6px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
   text-align: right;
-  font-weight: 600;
+  font-weight: 500;
   background-color: white;
   color: #333;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
 }
 
 .priceField:hover {
   border-color: #007bff;
-  background-color: #f8f9fa;
 }
 
 .priceField:focus {
   outline: none;
   border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-  background-color: white;
-  color: #333;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 
 .priceField::placeholder {
@@ -203,12 +199,12 @@
 }
 
 .currency {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: #28a745;
-  background-color: #d4edda;
-  padding: 4px 8px;
-  border-radius: 4px;
+  background-color: #e8f5e8;
+  padding: 3px 6px;
+  border-radius: 3px;
   border: 1px solid #c3e6cb;
 }
 
@@ -222,13 +218,13 @@
 }
 
 .cancelButton, .saveButton {
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
   border: none;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .cancelButton {
@@ -242,13 +238,13 @@
 }
 
 .saveButton {
-  background-color: #28a745;
+  background-color: #007bff;
   color: white;
-  border: 1px solid #28a745;
+  border: 1px solid #007bff;
 }
 
 .saveButton:hover:not(:disabled) {
-  background-color: #218838;
+  background-color: #0056b3;
 }
 
 .saveButton:disabled {
