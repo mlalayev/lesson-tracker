@@ -44,12 +44,38 @@ export default function TemplatesModal({ templateType, onClose }: TemplatesModal
   const title = useMemo(() => (templateType === 'odd' ? 'Odd days template' : 'Even days template'), [templateType]);
 
   useEffect(() => {
-    try {
-      const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS[templateType]) : null;
-      if (raw) {
-        setLessons(JSON.parse(raw));
+    const loadTemplates = async () => {
+      try {
+        // Load from MongoDB first, then localStorage as fallback
+        const { loadUserData } = await import('../lib/lessonSync');
+        const userData = await loadUserData();
+        
+        console.log('TemplatesModal loading templates for', templateType, ':', userData.templates[templateType]);
+        
+        if (userData.templates[templateType] && userData.templates[templateType].length > 0) {
+          setLessons(userData.templates[templateType]);
+        } else {
+          // Fallback to localStorage
+          const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS[templateType]) : null;
+          if (raw) {
+            const localTemplates = JSON.parse(raw);
+            setLessons(localTemplates);
+            console.log('TemplatesModal loaded from localStorage:', localTemplates);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading templates:', error);
+        // Final fallback to localStorage
+        try {
+          const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS[templateType]) : null;
+          if (raw) {
+            setLessons(JSON.parse(raw));
+          }
+        } catch {}
       }
-    } catch {}
+    };
+    
+    loadTemplates();
   }, [templateType]);
 
   useEffect(() => {
@@ -82,13 +108,37 @@ export default function TemplatesModal({ templateType, onClose }: TemplatesModal
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const persist = (items: TemplateLesson[]) => {
+  const persist = async (items: TemplateLesson[]) => {
     setLessons(items);
     try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEYS[templateType], JSON.stringify(items));
+      // Save to MongoDB and localStorage using lessonSync
+      const { saveTemplates, loadUserData } = await import('../lib/lessonSync');
+      
+      // Get current templates from storage
+      const userData = await loadUserData();
+      
+      // Update the specific template type
+      const updatedTemplates = {
+        ...userData.templates,
+        [templateType]: items
+      };
+      
+      console.log('TemplatesModal persist - saving templates:', updatedTemplates);
+      
+      // Save updated templates
+      await saveTemplates(updatedTemplates);
+    } catch (error) {
+      console.error('Error saving templates:', error);
+      
+      // Fallback to localStorage only
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEYS[templateType], JSON.stringify(items));
+        }
+      } catch (fallbackError) {
+        console.error('Error saving to localStorage fallback:', fallbackError);
       }
-    } catch {}
+    }
   };
 
   const handleAddFromModal = (data: { time: string; subject: string; studentName: string; notes?: string; duration: number; }) => {
@@ -130,61 +180,76 @@ export default function TemplatesModal({ templateType, onClose }: TemplatesModal
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.container} role="dialog" aria-modal="true">
+      <div className={styles.container}>
         <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <div>
-              <div className={styles.title}>{title}</div>
-              <div className={styles.subtitle}>Şablon dərsləri idarə edin</div>
-            </div>
-            <div className={styles.headerButtons}>
-              <div className={styles.revenueBadge}>{totalRevenue} AZN</div>
-              <button className={styles.addHeaderButton} onClick={() => setShowAddModal(true)}>Dərs əlavə et</button>
-              <button className={styles.closeButton} onClick={onClose} aria-label="Bağla">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+          <h2 className={styles.title}>{title}</h2>
+          <div className={styles.headerActions}>
+            <button className={styles.addButton} onClick={() => setShowAddModal(true)}>
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Dərs əlavə et
+            </button>
+            <button className={styles.closeButton} onClick={onClose}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
 
         <div className={styles.content}>
-          {lessons.length > 0 && (
-            <div className={styles.existingSection}>
-              <div className={styles.existingTitle}>Mövcud dərslər</div>
-              <div className={styles.existingList}>
-                {lessons.map(item => (
-                  <div key={item.id} className={styles.existingItem}>
-                    <div className={styles.lessonInfo}>
-                      <div className={styles.lessonTitle}>{item.time} - {item.subject}</div>
-                      <div className={styles.lessonDetails}>{item.studentName}</div>
-                      {item.notes && <div className={styles.lessonNotes}>{item.notes}</div>}
-                    </div>
-                    <div className={styles.itemActions}>
-                      <button className={styles.iconBtn} title="Redaktə et" onClick={() => handleEdit(item)}>
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button className={`${styles.iconBtn} ${styles.iconDanger}`} title="Sil" onClick={() => handleDelete(item.id)}>
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
+          <div className={styles.stats}>
+            <div className={styles.statItem}>
+              <span className={styles.statLabel}>Dərs sayı:</span>
+              <span className={styles.statValue}>{lessons.length}</span>
+            </div>
+            <div className={styles.statItem}>
+              <span className={styles.statLabel}>Ümumi gəlir:</span>
+              <span className={styles.statValue}>{totalRevenue} AZN</span>
+            </div>
+          </div>
+
+
+          {lessons.length > 0 ? (
+            <div className={styles.lessonsList}>
+              {lessons.map(item => (
+                <div key={item.id} className={styles.lessonItem}>
+                  <div className={styles.lessonInfo}>
+                    <div className={styles.lessonTime}>{item.time}</div>
+                    <div className={styles.lessonSubject}>{item.subject}</div>
+                    <div className={styles.lessonStudent}>{item.studentName}</div>
+                    {item.notes && <div className={styles.lessonNotes}>{item.notes}</div>}
                   </div>
-                ))}
-              </div>
+                  <div className={styles.lessonActions}>
+                    <button className={styles.editButton} onClick={() => handleEdit(item)}>
+                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button className={styles.deleteButton} onClick={() => handleDelete(item.id)}>
+                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              <p>Hələ dərs əlavə edilməyib</p>
             </div>
           )}
         </div>
+
         {showAddModal && (
           <AddTemplateLessonModal
             onClose={() => { setShowAddModal(false); setEditLesson(null); }}
             onSave={handleSaveFromModal}
             initialData={editLesson || undefined}
             title={editLesson ? 'Dərsi redaktə et' : 'Dərs əlavə et'}
+            existingLessons={lessons}
           />
         )}
       </div>

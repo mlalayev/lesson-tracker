@@ -17,9 +17,10 @@ interface AddTemplateLessonModalProps {
   onSave: (lesson: TemplateLessonInput) => void;
   initialData?: Partial<TemplateLessonInput>;
   title?: string;
+  existingLessons?: Array<{ time: string; id?: string }>;
 }
 
-export default function AddTemplateLessonModal({ onClose, onSave, initialData, title }: AddTemplateLessonModalProps) {
+export default function AddTemplateLessonModal({ onClose, onSave, initialData, title, existingLessons = [] }: AddTemplateLessonModalProps) {
   const [formData, setFormData] = useState<TemplateLessonInput>({
     time: initialData?.time || '09:00',
     subject: initialData?.subject || 'İngilis dili',
@@ -49,6 +50,13 @@ export default function AddTemplateLessonModal({ onClose, onSave, initialData, t
       timeSlots.push(t);
     }
   }
+
+  // Get taken time slots (excluding current lesson if editing)
+  const takenTimeSlots = existingLessons
+    .filter(lesson => lesson.id !== initialData?.id) // Exclude current lesson when editing
+    .map(lesson => lesson.time);
+
+  const isTimeSlotTaken = (time: string) => takenTimeSlots.includes(time);
 
   useEffect(() => {
     const count = calculateStudentCount(formData.studentName);
@@ -84,7 +92,14 @@ export default function AddTemplateLessonModal({ onClose, onSave, initialData, t
               <label className={styles.label}>Saat</label>
               <select className={styles.control} value={formData.time} onChange={(e) => handleInputChange('time', e.target.value)}>
                 {timeSlots.map(t => (
-                  <option key={t} value={t}>{t}</option>
+                  <option 
+                    key={t} 
+                    value={t} 
+                    disabled={isTimeSlotTaken(t)}
+                    className={isTimeSlotTaken(t) ? styles.disabledOption : ''}
+                  >
+                    {t} {isTimeSlotTaken(t) ? '(məşğul)' : ''}
+                  </option>
                 ))}
               </select>
             </div>

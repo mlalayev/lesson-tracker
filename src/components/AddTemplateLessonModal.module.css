@@ -19,5 +19,11 @@
 .primary { background: #030460; color: #ffffff; border: 1px solid #1e40af; border-radius: 10px; padding: 10px 12px; cursor: pointer; }
 .primary:hover { background: #1e40af; }
 
+.disabledOption {
+  color: #9ca3af !important;
+  background-color: #f3f4f6 !important;
+  font-style: italic;
+}
+
 
 

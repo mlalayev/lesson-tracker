@@ -1,0 +1,376 @@
+.container {
+  background: #030460;
+  min-height: 100vh;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 3rem;
+  padding: 1rem 0;
+}
+
+.title {
+  color: white;
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+}
+
+/* Teachers List */
+.teachersList h2 {
+  color: white;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.teachersGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.teacherCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.teacherCard:hover {
+  border-color: #030460;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.teacherInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.teacherCard h3 {
+  margin: 0;
+  color: #030460;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.teacherCard p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.teacherStats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.salary {
+  color: #059669 !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.currentMonth {
+  color: #030460;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+/* Teacher Details */
+.teacherDetails {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.backButton {
+  background: #030460;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 1rem;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.backButton:hover {
+  background: #1e40af;
+}
+
+.header h2 {
+  margin: 0;
+  color: #030460;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Months List */
+.monthsList h3 {
+  color: #030460;
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.monthsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.monthCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.monthCard:hover {
+  border-color: #030460;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.monthCard h4 {
+  margin: 0 0 0.75rem 0;
+  color: #030460;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.monthCard p {
+  margin: 0.25rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.actualSalary {
+  color: #059669 !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Month Details */
+.monthDetails {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.monthHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.monthHeader h3 {
+  margin: 0;
+  color: #030460;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Salary Section */
+.salarySection {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.salarySection h4 {
+  margin: 0 0 1rem 0;
+  color: #030460;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.salaryInput {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.salaryInput input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: white;
+  color: #030460;
+  transition: all 0.2s ease;
+}
+
+.salaryInput input::placeholder {
+  color: #9ca3af;
+}
+
+.salaryInput input:focus {
+  outline: none;
+  border-color: #030460;
+  box-shadow: 0 0 0 3px rgba(3, 4, 96, 0.1);
+}
+
+.salaryInput button {
+  background: #030460;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.salaryInput button:hover {
+  background: #1e40af;
+}
+
+/* Lessons Section */
+.lessonsSection {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.lessonsSection h4 {
+  margin: 0 0 1rem 0;
+  color: #030460;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.lessonsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lessonCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.lessonCard:hover {
+  border-color: #030460;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.lessonInfo {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.lessonInfo span {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.date {
+  background: #ebf8ff;
+  color: #2b6cb0;
+  border: 1px solid #bee3f8;
+}
+
+.time {
+  background: #faf5ff;
+  color: #553c9a;
+  border: 1px solid #e9d8fd;
+}
+
+.subject {
+  background: #f0fff4;
+  color: #276749;
+  border: 1px solid #c6f6d5;
+}
+
+.student {
+  background: #fffbeb;
+  color: #c05621;
+  border: 1px solid #fbd38d;
+}
+
+.lessonPrice {
+  font-weight: 600;
+  color: #059669;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .teachersGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .monthsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .lessonInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .lessonCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

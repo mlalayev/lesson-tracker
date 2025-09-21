@@ -6,4 +6,5 @@ export interface Lesson {
   studentName: string;
   notes?: string;
   duration: number; // dəqiqə ilə
+  teacherId?: string; // müəllimin ID-si
 }

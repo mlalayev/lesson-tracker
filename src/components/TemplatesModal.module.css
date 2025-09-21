@@ -1,3 +1,4 @@
+/* Simple and clean TemplatesModal design */
 .overlay {
   position: fixed;
   inset: 0;
@@ -9,65 +10,204 @@
   z-index: 60;
 }
 
-.container { background: #ffffff; border-radius: 16px; box-shadow: 0 20px 60px rgba(3,4,96,0.18); max-width: 680px; width: 100%; max-height: 88vh; overflow: hidden; border: 1px solid #e5e7eb; }
+.container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+}
 
-.header { background: linear-gradient(135deg, #ffffff, #eef2ff); color: #0f172a; padding: 14px 16px; border-bottom: 1px solid #e2e8f0; }
-
-.headerContent {
+.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
 }
 
-.headerButtons { display: flex; align-items: center; gap: 0.5rem; }
-.revenueBadge { background: #22c55e; color: #052e16; border: 1px solid #16a34a; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-weight: 700; display: inline-flex; align-items: center; }
-.addHeaderButton { background: #22c55e; color: #052e16; border: 1px solid #16a34a; border-radius: 0.5rem; padding: 0.5rem 0.75rem; cursor: pointer; font-weight: 600; }
-.addHeaderButton:hover { background: #16a34a; color: #ffffff; }
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 
-.title { font-size: 1.1rem; font-weight: 700; }
-
-.subtitle { color: #475569; margin-top: 2px; font-size: 0.9rem; }
-
-.closeButton { color: #334155; transition: background 150ms; padding: 8px; border-radius: 9999px; }
-.closeButton:hover { background: #e2e8f0; }
-
-.content { padding: 12px 16px 16px 16px; overflow: auto; }
-
-.existingSection { margin-bottom: 1rem; }
-.existingTitle {
+.title {
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #1e3a8a;
-  margin-bottom: 0.5rem;
+  color: #111827;
+  margin: 0;
 }
-.existingList { display: flex; flex-direction: column; gap: 0.5rem; }
-.existingItem { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
-.lessonInfo { flex: 1; }
-.itemActions { display: flex; align-items: center; gap: 6px; }
-.iconBtn { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #111827; cursor: pointer; transition: background 150ms; }
-.iconBtn:hover { background: #f1f5f9; }
-.iconDanger { color: #b91c1c; border-color: #fecaca; background: #fee2e2; }
-.lessonTitle { font-weight: 700; color: #0f172a; }
-.lessonDetails { font-size: 0.9rem; color: #334155; }
-.lessonNotes { font-size: 0.85rem; color: #475569; margin-top: 2px; }
-.smallButton { font-size: 0.875rem; padding: 6px 10px; border-radius: 10px; border: 1px solid #e2e8f0; background: white; cursor: pointer; }
-.smallButton:hover { background: #f1f5f9; }
-.danger { color: #b91c1c; border-color: #fecaca; background: #fee2e2; }
 
-.form { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem; }
-.formGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-.formField { display: flex; flex-direction: column; gap: 0.25rem; }
-.formFieldFull { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 0.25rem; }
-.label { font-size: 0.875rem; font-weight: 600; color: #1e3a8a; }
-.select, .input, .textarea { border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.5rem 0.625rem; background: white; color: #000000; }
-.textarea { resize: vertical; }
-.priceInfo { display: flex; gap: 0.5rem; margin-top: 0.25rem; color: #0f766e; font-weight: 600; }
-.studentCount { background: #ccfbf1; padding: 0.125rem 0.5rem; border-radius: 9999px; }
-.calculatedPrice { background: #a7f3d0; padding: 0.125rem 0.5rem; border-radius: 9999px; }
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-.actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.75rem; }
-.secondaryButton { background: #e5e7eb; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.5rem 0.75rem; cursor: pointer; }
-.secondaryButton:hover { background: #d1d5db; }
-.primaryButton { background: #030460; color: white; border: 1px solid #1e40af; border-radius: 0.5rem; padding: 0.5rem 0.75rem; cursor: pointer; }
-.primaryButton:hover { background: #1e40af; }
+.closeButton:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
 
+.content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(80vh - 80px);
+}
 
+.stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.addButton:hover {
+  background: #1d4ed8;
+}
+
+.lessonsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lessonItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.lessonItem:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.lessonInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lessonTime {
+  font-weight: 600;
+  color: #2563eb;
+  font-size: 0.875rem;
+}
+
+.lessonSubject {
+  font-weight: 500;
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.lessonStudent {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.lessonNotes {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.lessonActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editButton,
+.deleteButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editButton {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.editButton:hover {
+  background: #bae6fd;
+}
+
+.deleteButton {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.deleteButton:hover {
+  background: #fecaca;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.875rem;
+}

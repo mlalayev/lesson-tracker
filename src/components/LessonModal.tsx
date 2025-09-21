@@ -65,6 +65,8 @@ export default function LessonModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('LessonModal handleSubmit called with formData:', formData);
+    
     // Local timezone istifadə et (UTC deyil)
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -77,6 +79,7 @@ export default function LessonModal({
       ...formData
     };
     
+    console.log('LessonModal creating newLesson:', newLesson);
     onSave(newLesson);
   };
 
