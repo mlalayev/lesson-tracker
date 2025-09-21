@@ -1,47 +1,34 @@
-/* ViewLessonsModal - Minimalistic Single Column Design */
+/* ViewLessonsModal - Minimalistic Design */
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
-  padding: 1rem;
+  z-index: 70;
+  padding: 16px;
 }
 
 .container {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 850px !important;
+  max-width: 850px;
   max-height: 85vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 .header {
-  background: #fafbfc;
+  background: #fafafa;
   border-bottom: 1px solid #e5e7eb;
-  color: #1f2937;
+  color: #333;
   padding: 20px 24px;
 }
 
@@ -52,33 +39,33 @@
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
-  color: #1f2937;
+  color: #333;
 }
 
 .subtitle {
   font-size: 0.875rem;
   margin: 4px 0 0 0;
-  color: #6b7280;
+  color: #666;
 }
 
 .closeButton {
   background: none;
   border: none;
-  color: #6b7280;
-  padding: 4px;
+  color: #666;
+  padding: 6px;
   border-radius: 4px;
   cursor: pointer;
-  transition: color 0.15s;
+  transition: background 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .closeButton:hover {
-  color: #374151;
+  background: #e9ecef;
 }
 
 .content {
@@ -100,12 +87,12 @@
 .emptyTitle {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #374151;
+  color: #333;
   margin: 0 0 8px 0;
 }
 
 .emptyDescription {
-  color: #6b7280;
+  color: #666;
   margin: 0;
   font-size: 0.875rem;
 }
@@ -115,24 +102,24 @@
 }
 
 .lessonsHeader {
-  padding: 20px 24px 16px 24px;
+  padding: 16px 20px 12px 20px;
   border-bottom: 1px solid #f1f5f9;
 }
 
 .lessonsTitle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 1rem;
+  gap: 6px;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #374151;
+  color: #333;
   margin: 0;
 }
 
 .titleIndicator {
-  width: 3px;
-  height: 16px;
-  background: #3b82f6;
+  width: 2px;
+  height: 12px;
+  background: #007bff;
   border-radius: 2px;
 }
 
@@ -142,15 +129,15 @@
 }
 
 .lessonCard {
-  border-bottom: 1px solid #f1f5f9;
-  padding: 20px 24px;
-  transition: background-color 0.15s ease;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  transition: background-color 0.2s ease;
   width: 100% !important;
   max-width: none !important;
 }
 
 .lessonCard:hover {
-  background: #fafbfc;
+  background: #f8f9fa;
 }
 
 .lessonCard:last-child {
@@ -161,24 +148,24 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .subjectInfo {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 8px;
   flex: 1;
 }
 
 .subjectIcon {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: white;
   flex-shrink: 0;
 }
@@ -189,29 +176,29 @@
 }
 
 .subjectName {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 4px 0;
+  color: #333;
+  margin: 0 0 2px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .groupBadge {
-  background: #fbbf24;
-  color: #92400e;
-  font-size: 0.75rem;
+  background: #e9ecef;
+  color: #495057;
+  font-size: 0.7rem;
   font-weight: 500;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 1px 4px;
+  border-radius: 3px;
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
 
 .studentName {
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 0.8rem;
+  color: #666;
   margin: 0;
   word-break: break-word;
 }
@@ -224,103 +211,103 @@
 
 .editButton,
 .deleteButton {
-  width: 28px;
-  height: 28px;
-  border: 1px solid #e5e7eb;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ced4da;
   border-radius: 4px;
   background: white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .editButton {
-  color: #6b7280;
+  color: #666;
 }
 
 .editButton:hover {
-  color: #3b82f6;
-  border-color: #3b82f6;
-  background: #f0f9ff;
+  color: #007bff;
+  border-color: #007bff;
+  background: #f8f9fa;
 }
 
 .deleteButton {
-  color: #6b7280;
+  color: #666;
 }
 
 .deleteButton:hover {
-  color: #ef4444;
-  border-color: #ef4444;
-  background: #fef2f2;
+  color: #dc3545;
+  border-color: #dc3545;
+  background: #f8f9fa;
 }
 
 .lessonDetails {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 12px;
   align-items: center;
 }
 
 .timeInfo {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 12px;
   align-items: center;
 }
 
 .timeItem {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.875rem;
+  gap: 4px;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
 .timeLabel {
   font-weight: 500;
-  color: #6b7280;
+  color: #666;
 }
 
 .timeValue {
   font-weight: 600;
-  color: #374151;
+  color: #333;
 }
 
 .priceValue {
   font-weight: 600;
-  color: #059669;
-  background: #d1fae5;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  color: #28a745;
+  background: #d4edda;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.8rem;
 }
 
 .notesSection {
-  margin-top: 12px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 6px;
-  border-left: 3px solid #3b82f6;
+  margin-top: 8px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
   width: 100%;
 }
 
 .notesLabel {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: #6b7280;
+  color: #666;
   text-transform: uppercase;
   letter-spacing: 0.025em;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .notesText {
-  font-size: 0.875rem;
-  color: #374151;
+  font-size: 0.8rem;
+  color: #333;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
   word-break: break-word;
 }
 

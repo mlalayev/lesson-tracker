@@ -205,14 +205,7 @@ export default function AdminPanel() {
                   <h3>{teacher.name}</h3>
                   <p>{teacher.email}</p>
                 </div>
-                <div className={styles.teacherStats}>
-                  <p className={styles.currentMonth}>
-                    Bu ay: {teacher.currentMonthLessons || 0} dərs
-                  </p>
-                  <p className={styles.salary}>
-                    {teacher.currentMonthSalary?.toFixed(2) || '0.00'} AZN
-                  </p>
-                </div>
+              
                 <div className={styles.teacherActions}>
                   <button 
                     className={styles.viewProfileButton}
