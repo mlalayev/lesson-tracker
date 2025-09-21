@@ -65,7 +65,17 @@ export default function LessonModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('LessonModal handleSubmit called with formData:', formData);
+    
+    // Validation checks
+    if (!formData.subject || formData.subject.trim() === '') {
+      alert('Please select a subject');
+      return;
+    }
+    
+    if (!formData.studentName || formData.studentName.trim() === '') {
+      alert('Please enter student name(s)');
+      return;
+    }
     
     // Local timezone istifadə et (UTC deyil)
     const year = date.getFullYear();
@@ -73,13 +83,30 @@ export default function LessonModal({
     const day = date.getDate().toString().padStart(2, '0');
     const localDateString = `${year}-${month}-${day}`;
     
+    
     const newLesson: Lesson = {
       id: Date.now().toString(),
       date: localDateString,
-      ...formData
+      time: formData.time,
+      subject: formData.subject,
+      studentName: formData.studentName,
+      notes: formData.notes || '',
+      duration: formData.duration,
     };
     
-    console.log('LessonModal creating newLesson:', newLesson);
+    // FORCE the date field multiple times to ensure it's not lost
+    newLesson.date = localDateString;
+    console.log('FORCED date to:', newLesson.date);
+    console.log('newLesson after forcing date:', JSON.stringify(newLesson, null, 2));
+    
+    
+    // Final validation before saving
+    if (!newLesson.date || !newLesson.time || !newLesson.subject || !newLesson.studentName) {
+      console.error('Lesson validation failed - missing required fields:', newLesson);
+      alert('Error: Lesson is missing required fields. Please try again.');
+      return;
+    }
+    
     onSave(newLesson);
   };
 
@@ -175,7 +202,6 @@ export default function LessonModal({
                 className={styles.select}
                 required
               >
-                <option value="">Fənn seçin</option>
                 {subjects.map((subject) => (
                   <option key={subject} value={subject}>
                     {subject}

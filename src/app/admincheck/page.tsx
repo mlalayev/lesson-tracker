@@ -50,7 +50,9 @@ export default function AdminPanel() {
                   
                   // Filter lessons for current month
                   const currentMonthLessons = lessonsData.lessons.filter((lesson: any) => {
-                    const [year, month] = lesson.date.split('-');
+                    if (!lesson.date) return false;
+                    if (!lesson.date) return false;
+      const [year, month] = lesson.date.split('-');
                     return parseInt(year) === currentYear && parseInt(month) === currentMonth;
                   });
                   
@@ -102,6 +104,7 @@ export default function AdminPanel() {
     const monthlyMap = new Map<string, Lesson[]>();
     
     teacherLessons.forEach(lesson => {
+      if (!lesson.date) return false;
       const [year, month] = lesson.date.split('-');
       const key = `${year}-${month}`;
       if (!monthlyMap.has(key)) {
@@ -178,7 +181,8 @@ export default function AdminPanel() {
         
         // Cari ayın dərslərini tap
         const currentMonthLessons = allLessons.filter((lesson: any) => {
-          const [year, month] = lesson.date.split('-');
+          if (!lesson.date) return false;
+      const [year, month] = lesson.date.split('-');
           return parseInt(year) === currentYear && parseInt(month) === currentMonth;
         });
         

@@ -10,6 +10,17 @@ export interface ITemplateLesson {
   teacherId?: string;
 }
 
+export interface ILesson {
+  id: string;
+  date: string;
+  time: string;
+  subject: string;
+  studentName: string;
+  notes?: string;
+  duration: number;
+  teacherId?: string;
+}
+
 export interface ISalary {
   year: number;
   month: number;
@@ -26,7 +37,7 @@ export interface IUser {
     odd: ITemplateLesson[];
     even: ITemplateLesson[];
   };
-  lessons: ITemplateLesson[]; // User's lessons
+  lessons: ILesson[]; // User's lessons
   salaries: ISalary[]; // Teacher salaries by month
   createdAt: Date;
   updatedAt: Date;
@@ -34,6 +45,17 @@ export interface IUser {
 
 const TemplateLessonSchema = new Schema<ITemplateLesson>({
   id: { type: String, required: true },
+  time: { type: String, required: true },
+  subject: { type: String, required: true },
+  studentName: { type: String, required: true },
+  notes: { type: String },
+  duration: { type: Number, required: true },
+  teacherId: { type: String }
+}, { _id: false });
+
+const LessonSchema = new Schema<ILesson>({
+  id: { type: String, required: true },
+  date: { type: String, required: true },
   time: { type: String, required: true },
   subject: { type: String, required: true },
   studentName: { type: String, required: true },
@@ -57,7 +79,7 @@ const UserSchema = new Schema<IUser>({
     odd: { type: [TemplateLessonSchema], default: [] },
     even: { type: [TemplateLessonSchema], default: [] }
   },
-  lessons: { type: [TemplateLessonSchema], default: [] },
+  lessons: { type: [LessonSchema], default: [] },
   salaries: { type: [SalarySchema], default: [] }
 }, { timestamps: true });
 

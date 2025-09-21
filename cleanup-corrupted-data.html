@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cleanup Corrupted Data</title>
+</head>
+<body>
+    <h1>Cleanup Corrupted Lesson Data</h1>
+    <button onclick="cleanupData()">Clean Up Corrupted Data</button>
+    <div id="result"></div>
+
+    <script>
+        async function cleanupData() {
+            try {
+                // Get user ID from localStorage
+                const authUser = localStorage.getItem('authUser');
+                if (!authUser) {
+                    document.getElementById('result').innerHTML = 'Error: No user found in localStorage';
+                    return;
+                }
+                
+                const user = JSON.parse(authUser);
+                const userId = user.id || user.email;
+                
+                
+                const response = await fetch('/api/clear-corrupted', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId }),
+                });
+                
+                const result = await response.json();
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>Cleanup Result:</h3>
+                    <p><strong>Message:</strong> ${result.message}</p>
+                    <p><strong>Cleared:</strong> ${result.clearedCount} corrupted lessons</p>
+                    <p><strong>Valid:</strong> ${result.validCount} lessons kept</p>
+                `;
+                
+                // Clear localStorage lessons to force reload
+                localStorage.removeItem('lessons');
+                
+                alert('Cleanup completed! Please refresh the main page.');
+                
+            } catch (error) {
+                console.error('Error during cleanup:', error);
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

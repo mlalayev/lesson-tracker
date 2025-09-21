@@ -7,7 +7,6 @@ import LessonModal from "../components/LessonModal";
 import { Lesson } from "../types/lesson";
 import {
   loadLessons,
-  saveLessons,
   deleteLesson,
   clearDayLessons,
 } from "../lib/lessonSync";
@@ -52,13 +51,27 @@ export default function Home() {
   };
 
   const handleSaveLesson = async (lesson: Lesson) => {
-    console.log('handleSaveLesson called with lesson:', lesson);
+    console.log('=== DEBUGGING handleSaveLesson ===');
+    console.log('Received lesson from modal:', lesson);
+    console.log('Lesson has date?', !!lesson.date);
+    console.log('Lesson date value:', lesson.date);
+    console.log('All lesson fields:', Object.keys(lesson));
+    
+    // CHECK: Make sure the new lesson has date before adding to array
+    if (!lesson.date) {
+      console.error('CRITICAL ERROR: Lesson received without date!', lesson);
+      alert('ERROR: Lesson missing date field. Cannot save.');
+      return;
+    }
+    
     const newLessons = [...lessons, lesson];
-    console.log('newLessons array:', newLessons);
+    console.log('New lessons array length:', newLessons.length);
+    console.log('Last lesson in array:', newLessons[newLessons.length - 1]);
+    console.log('Last lesson has date?', !!newLessons[newLessons.length - 1].date);
+    
     setLessons(newLessons);
-    console.log('About to call saveLessons...');
-    await saveLessons(newLessons);
-    console.log('saveLessons completed');
+    
+    
     setIsModalOpen(false);
   };
 
@@ -78,6 +91,35 @@ export default function Home() {
     await clearDayLessons(date);
   };
 
+  const handleLessonsUpdate = async () => {
+    try {
+      const lessonsData = await loadLessons();
+      
+      // Filter lessons for 2025 to see how many we have
+      const lessons2025 = lessonsData.filter(lesson => lesson.date?.startsWith('2025'));
+      
+      setLessons(lessonsData);
+    } catch (error) {
+      console.error("Error refreshing lessons:", error);
+      // Fallback to localStorage only
+      const savedLessons = localStorage.getItem("lessons");
+      if (savedLessons) {
+        const parsedLessons = JSON.parse(savedLessons);
+        // Handle both old format (flat array) and new format (organized by year)
+        if (typeof parsedLessons === 'object' && !Array.isArray(parsedLessons)) {
+          // New format: organized by year
+          const allLessons = Object.values(parsedLessons).flat();
+          setLessons(allLessons as Lesson[]);
+        } else {
+          // Old format: flat array
+          setLessons(parsedLessons);
+        }
+      } else {
+        console.warn('No lessons found in localStorage fallback');
+      }
+    }
+  };
+
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("authUser");
@@ -95,6 +137,7 @@ export default function Home() {
           onDateClick={handleDateClick}
           onDeleteLesson={handleDeleteLesson}
           onClearDay={handleClearDay}
+          onLessonsUpdate={handleLessonsUpdate}
         />
 
         {isModalOpen && selectedDate && (

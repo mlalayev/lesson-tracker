@@ -14,7 +14,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const user = await User.findById(userId);
+    // Try to find user by ID first, then by email
+    let user = await User.findById(userId);
+    if (!user) {
+      user = await User.findOne({ email: userId });
+    }
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -38,6 +42,16 @@ export async function POST(request: NextRequest) {
     
     const { lessons, templates, userId } = await request.json();
     
+    console.log('=== API ROUTE DEBUG ===');
+    console.log('Received userId:', userId);
+    console.log('Received lessons count:', lessons?.length || 0);
+    
+    if (lessons && lessons.length > 0) {
+      console.log('First lesson received:', lessons[0]);
+      console.log('First lesson has date?', !!lessons[0].date);
+      console.log('All lesson fields:', Object.keys(lessons[0]));
+    }
+    
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
@@ -45,18 +59,51 @@ export async function POST(request: NextRequest) {
     const updateData: any = {};
     
     if (lessons !== undefined) {
-      updateData.lessons = lessons;
+      // ENSURE ALL LESSONS HAVE DATE FIELDS BEFORE SAVING
+      const lessonsWithValidDates = lessons.map((lesson: any, index: number) => {
+        console.log(`API: Checking lesson ${index + 1}:`, lesson);
+        console.log(`API: Lesson ${index + 1} has date?`, !!lesson.date);
+        
+        if (!lesson.date) {
+          console.error(`API: CRITICAL - Lesson ${index + 1} missing date field!`, lesson);
+          console.error('API: REJECTING lesson without date - will not save to MongoDB');
+          // Don't save lessons without dates
+          return null;
+        }
+        
+        // DOUBLE CHECK: Ensure date exists and is valid
+        if (typeof lesson.date !== 'string' || lesson.date.trim() === '') {
+          console.error(`API: CRITICAL - Lesson ${index + 1} has invalid date:`, lesson.date);
+          return null;
+        }
+        
+        return lesson;
+      }).filter(Boolean); // Remove null entries
+      
+      console.log(`API: Original lessons: ${lessons.length}, Valid lessons with dates: ${lessonsWithValidDates.length}`);
+      
+      updateData.lessons = lessonsWithValidDates;
+      console.log('Setting updateData.lessons with', lessonsWithValidDates.length, 'lessons');
     }
     
     if (templates !== undefined) {
       updateData.templates = templates;
     }
 
-    const user = await User.findByIdAndUpdate(
+    // Try to find and update user by ID first, then by email
+    let user = await User.findByIdAndUpdate(
       userId,
       updateData,
       { new: true, upsert: false }
     );
+    
+    if (!user) {
+      user = await User.findOneAndUpdate(
+        { email: userId },
+        updateData,
+        { new: true, upsert: false }
+      );
+    }
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -86,7 +133,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Lesson ID and User ID are required' }, { status: 400 });
     }
 
-    const user = await User.findById(userId);
+    // Try to find user by ID first, then by email
+    let user = await User.findById(userId);
+    if (!user) {
+      user = await User.findOne({ email: userId });
+    }
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

@@ -45,33 +45,29 @@ export default function TemplatesModal({ templateType, onClose }: TemplatesModal
 
   useEffect(() => {
     const loadTemplates = async () => {
+      
       try {
-        // Load from MongoDB first, then localStorage as fallback
-        const { loadUserData } = await import('../lib/lessonSync');
-        const userData = await loadUserData();
-        
-        console.log('TemplatesModal loading templates for', templateType, ':', userData.templates[templateType]);
-        
-        if (userData.templates[templateType] && userData.templates[templateType].length > 0) {
-          setLessons(userData.templates[templateType]);
-        } else {
-          // Fallback to localStorage
-          const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS[templateType]) : null;
-          if (raw) {
-            const localTemplates = JSON.parse(raw);
-            setLessons(localTemplates);
-            console.log('TemplatesModal loaded from localStorage:', localTemplates);
-          }
+        // First try localStorage for immediate loading
+        const localRaw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS[templateType]) : null;
+        if (localRaw) {
+          const localTemplates = JSON.parse(localRaw);
+          setLessons(localTemplates);
         }
+        
+        // Templates are now loaded only from localStorage above
+        
       } catch (error) {
         console.error('Error loading templates:', error);
         // Final fallback to localStorage
         try {
           const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS[templateType]) : null;
           if (raw) {
-            setLessons(JSON.parse(raw));
+            const fallbackTemplates = JSON.parse(raw);
+            setLessons(fallbackTemplates);
           }
-        } catch {}
+        } catch (fallbackError) {
+          console.error('Fallback error:', fallbackError);
+        }
       }
     };
     
@@ -110,27 +106,21 @@ export default function TemplatesModal({ templateType, onClose }: TemplatesModal
 
   const persist = async (items: TemplateLesson[]) => {
     setLessons(items);
+    
     try {
-      // Save to MongoDB and localStorage using lessonSync
-      const { saveTemplates, loadUserData } = await import('../lib/lessonSync');
+      // Save to localStorage immediately for instant feedback
+      if (typeof window !== 'undefined') {
+        console.log(`💾 Saving ${items.length} ${templateType} templates to localStorage key: ${STORAGE_KEYS[templateType]}`);
+        localStorage.setItem(STORAGE_KEYS[templateType], JSON.stringify(items));
+        console.log(`✅ Successfully saved templates to localStorage`);
+      }
       
-      // Get current templates from storage
-      const userData = await loadUserData();
+      // Templates are now saved only to localStorage above
       
-      // Update the specific template type
-      const updatedTemplates = {
-        ...userData.templates,
-        [templateType]: items
-      };
-      
-      console.log('TemplatesModal persist - saving templates:', updatedTemplates);
-      
-      // Save updated templates
-      await saveTemplates(updatedTemplates);
     } catch (error) {
       console.error('Error saving templates:', error);
       
-      // Fallback to localStorage only
+      // Ensure localStorage fallback is working
       try {
         if (typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_KEYS[templateType], JSON.stringify(items));
@@ -190,7 +180,11 @@ export default function TemplatesModal({ templateType, onClose }: TemplatesModal
               </svg>
               Dərs əlavə et
             </button>
-            <button className={styles.closeButton} onClick={onClose}>
+            <button className={styles.closeButton} onClick={() => {
+              console.log('TemplatesModal closing with lessons:', lessons);
+              console.log('localStorage before close:', localStorage.getItem(STORAGE_KEYS[templateType]));
+              onClose();
+            }}>
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>

@@ -12,6 +12,7 @@ interface CalendarProps {
   onDateClick: (date: Date) => void;
   onDeleteLesson?: (lessonId: string) => void;
   onClearDay?: (date: Date) => void;
+  onLessonsUpdate?: () => void; // Callback to refresh lessons after template operations
 }
 
 export default function Calendar({
@@ -19,6 +20,7 @@ export default function Calendar({
   onDateClick,
   onDeleteLesson,
   onClearDay,
+  onLessonsUpdate,
 }: CalendarProps) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -45,26 +47,80 @@ export default function Calendar({
   const [showDaySelection, setShowDaySelection] = useState(false);
   const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
   const [pendingTemplateType, setPendingTemplateType] = useState<"odd" | "even" | null>(null);
+  const [templatesRefreshKey, setTemplatesRefreshKey] = useState(0);
+  
+  // Client-side only state for template existence
+  const [templatesStatus, setTemplatesStatus] = useState<{
+    odd: boolean;
+    even: boolean;
+    loaded: boolean;
+  }>({
+    odd: false,
+    even: false,
+    loaded: false
+  });
 
-  // Helper function to check if templates exist
-  const checkTemplatesExist = (templateType: "odd" | "even") => {
-    const key = templateType === "odd" ? "template_odd_days" : "template_even_days";
-    const raw = typeof window !== "undefined" ? localStorage.getItem(key) : null;
-    const templateLessons = raw ? JSON.parse(raw) : [];
-    return templateLessons && templateLessons.length > 0;
+  // Debug helper - log localStorage contents
+  const debugLocalStorage = () => {
+    console.log('🔍 DEBUG: localStorage contents:');
+    console.log('template_odd_days:', localStorage.getItem('template_odd_days'));
+    console.log('template_even_days:', localStorage.getItem('template_even_days'));
+    console.log('lessons:', localStorage.getItem('lessons'));
+    console.log('Current templatesStatus:', templatesStatus);
   };
 
-  // Async version to check templates from MongoDB first
-  const checkTemplatesExistAsync = async (templateType: "odd" | "even") => {
-    try {
-      const { loadUserData } = await import('../lib/lessonSync');
-      const userData = await loadUserData();
-      return userData.templates[templateType] && userData.templates[templateType].length > 0;
-    } catch (error) {
-      console.error('Error checking templates from MongoDB:', error);
-      // Fallback to localStorage check
-      return checkTemplatesExist(templateType);
+  // Expose debug function globally (only in development)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).debugTemplates = debugLocalStorage;
+      console.log('🛠️ Debug function available: call debugTemplates() in console');
     }
+  }, [templatesStatus]);
+
+  // Load template status on client side only
+  useEffect(() => {
+    const loadTemplateStatus = async () => {
+      try {
+        // Load templates from localStorage only using correct keys
+        const STORAGE_KEYS = {
+          odd: 'template_odd_days',
+          even: 'template_even_days',
+        };
+        
+        const oddTemplatesRaw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.odd) : null;
+        const evenTemplatesRaw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.even) : null;
+        
+        const oddTemplates = oddTemplatesRaw ? JSON.parse(oddTemplatesRaw) : [];
+        const evenTemplates = evenTemplatesRaw ? JSON.parse(evenTemplatesRaw) : [];
+        
+        const newStatus = {
+          odd: oddTemplates.length > 0,
+          even: evenTemplates.length > 0,
+          loaded: true
+        };
+        
+        console.log(`📊 Template Status:`, {
+          oddCount: oddTemplates.length,
+          evenCount: evenTemplates.length,
+          newStatus
+        });
+        
+        setTemplatesStatus(newStatus);
+      } catch (error) {
+        console.error('Error loading template status:', error);
+        // Set loaded to true even on error to prevent infinite loading
+        setTemplatesStatus(prev => ({ ...prev, loaded: true }));
+      }
+    };
+
+    loadTemplateStatus();
+  }, [templatesRefreshKey]);
+
+  // Helper function to check if templates exist (client-side safe)
+  const checkTemplatesExist = (templateType: "odd" | "even") => {
+    const result = templatesStatus.loaded ? templatesStatus[templateType] : false;
+    console.log(`🔍 checkTemplatesExist(${templateType}): loaded=${templatesStatus.loaded}, status=${templatesStatus[templateType]}, result=${result}`);
+    return result;
   };
 
   useEffect(() => {
@@ -158,7 +214,15 @@ export default function Calendar({
 
   const getLessonsForDate = (date: Date) => {
     const dateString = date.toISOString().split("T")[0];
-    return lessons.filter((lesson) => lesson.date === dateString);
+    const filteredLessons = lessons.filter((lesson) => lesson.date === dateString);
+    
+    // Debug logging for the first few days to see what's happening
+    if (date.getDate() <= 3 && date.getMonth() === 0) { // First 3 days of January
+      console.log(`getLessonsForDate: ${dateString}, found ${filteredLessons.length} lessons`);
+      console.log('Available lessons sample:', lessons.slice(0, 5).map(l => ({ date: l.date, subject: l.subject })));
+    }
+    
+    return filteredLessons;
   };
 
   const handleMonthClick = (monthIndex: number) => {
@@ -292,7 +356,7 @@ export default function Calendar({
             // New format: organize by year
             const lessonsByYear: { [year: string]: any[] } = {};
             filtered.forEach(lesson => {
-              const year = lesson.date.split('-')[0];
+              const year = lesson.date ? lesson.date.split('-')[0] : new Date().getFullYear().toString();
               if (!lessonsByYear[year]) {
                 lessonsByYear[year] = [];
               }
@@ -305,16 +369,13 @@ export default function Calendar({
           }
         }
         
-        // Also update MongoDB using lessonSync
-        try {
-          const { saveLessons } = await import('../lib/lessonSync');
-          await saveLessons(filtered);
-          console.log('Successfully updated MongoDB after clearing day');
-        } catch (error) {
-          console.error('Error updating MongoDB after clearing day:', error);
-        }
         
-        window.location.reload();
+        // Refresh lessons in parent component
+        if (onLessonsUpdate) {
+          onLessonsUpdate();
+        } else {
+          window.location.reload();
+        }
       } catch (e) {
         console.error(e);
       }
@@ -352,7 +413,7 @@ export default function Calendar({
           // New format: organize by year
           const lessonsByYear: { [year: string]: any[] } = {};
           filtered.forEach(lesson => {
-            const year = lesson.date.split('-')[0];
+            const year = lesson.date ? lesson.date.split('-')[0] : new Date().getFullYear().toString();
             if (!lessonsByYear[year]) {
               lessonsByYear[year] = [];
             }
@@ -365,17 +426,15 @@ export default function Calendar({
         }
       }
       
-      // Also update MongoDB using lessonSync
-      try {
-        const { saveLessons } = await import('../lib/lessonSync');
-        await saveLessons(filtered);
-        console.log('Successfully updated MongoDB after clearing month');
-      } catch (error) {
-        console.error('Error updating MongoDB after clearing month:', error);
-      }
       
       alert(`Cleared all lessons in ${months[monthIndex]} ${currentYear}.`);
-      window.location.reload();
+      
+      // Refresh lessons in parent component
+      if (onLessonsUpdate) {
+        onLessonsUpdate();
+      } else {
+        window.location.reload();
+      }
     } catch (e) {
       console.error(e);
     }
@@ -401,20 +460,16 @@ export default function Calendar({
     if (!pendingTemplateType || selectedDays.size === 0) return;
     
     try {
-      const key = pendingTemplateType === "odd" ? "template_odd_days" : "template_even_days";
-      const raw = typeof window !== "undefined" ? localStorage.getItem(key) : null;
+      // Load templates from localStorage only using correct keys
+      const STORAGE_KEYS = {
+        odd: 'template_odd_days',
+        even: 'template_even_days',
+      };
       
-      console.log(`handleApplyTemplateToSelectedDays - template: ${pendingTemplateType}, key: ${key}, raw data:`, raw);
+      const templatesRaw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS[pendingTemplateType!]) : null;
+      const templateLessons = templatesRaw ? JSON.parse(templatesRaw) : [];
       
-      const templateLessons: Array<{
-        time: string;
-        subject: string;
-        studentName: string;
-        notes?: string;
-        duration: number;
-      }> = raw ? JSON.parse(raw) : [];
-      
-      console.log(`handleApplyTemplateToSelectedDays - parsed templateLessons:`, templateLessons);
+      console.log(`handleApplyTemplateToSelectedDays - template: ${pendingTemplateType}, loaded templateLessons:`, templateLessons);
       
       if (!templateLessons || templateLessons.length === 0) {
         alert(`No ${pendingTemplateType} template lessons found. Please create template lessons first by going to Templates menu and adding lessons to the ${pendingTemplateType} template.`);
@@ -465,7 +520,7 @@ export default function Calendar({
       // Save to localStorage organized by year
       const lessonsByYear: { [year: string]: Lesson[] } = {};
       existingLessons.forEach(lesson => {
-        const year = lesson.date.split('-')[0];
+        const year = lesson.date ? lesson.date.split('-')[0] : new Date().getFullYear().toString();
         if (!lessonsByYear[year]) {
           lessonsByYear[year] = [];
         }
@@ -473,20 +528,27 @@ export default function Calendar({
       });
       localStorage.setItem("lessons", JSON.stringify(lessonsByYear));
       
-      // Also save to MongoDB using lessonSync
-      try {
-        const { saveLessons } = await import('../lib/lessonSync');
-        await saveLessons(existingLessons);
-        console.log('Successfully saved selected days template lessons to MongoDB');
-      } catch (error) {
-        console.error('Error saving selected days template lessons to MongoDB:', error);
+      
+      // Refresh lessons in parent component FIRST
+      if (onLessonsUpdate) {
+        await onLessonsUpdate();
       }
       
+      // Refresh template status after successful operation
+      setTemplatesRefreshKey(prev => prev + 1);
+      
       alert(`Added ${addedCount} lessons to selected days.`);
-      window.location.reload();
+      
+      // Fallback reload if no callback provided
+      if (!onLessonsUpdate) {
+        window.location.reload();
+      }
     } catch (e) {
       console.error(e);
       alert("Failed to apply template to selected days.");
+      
+      // Refresh template status even on error to ensure UI is up to date
+      setTemplatesRefreshKey(prev => prev + 1);
     }
 
     // Reset state
@@ -499,19 +561,31 @@ export default function Calendar({
     template: "odd" | "even",
     monthIndex: number
   ) => {
+    console.log(`🔥 copyTemplateToMonth called with template: ${template}, monthIndex: ${monthIndex}`);
+    
     try {
-      // Load templates from MongoDB first
-      const { loadUserData } = await import('../lib/lessonSync');
-      const userData = await loadUserData();
+      // Load templates from localStorage only using correct keys
+      const STORAGE_KEYS = {
+        odd: 'template_odd_days',
+        even: 'template_even_days',
+      };
       
-      console.log(`copyTemplateToMonth - template: ${template}, loaded userData:`, userData);
+      console.log(`🔍 Looking for template key: ${STORAGE_KEYS[template]}`);
+      const templatesRaw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS[template]) : null;
+      console.log(`📦 Raw template data:`, templatesRaw);
       
-      const templateLessons = userData.templates[template] || [];
+      const templateLessons = templatesRaw ? JSON.parse(templatesRaw) : [];
+      console.log(`📚 Parsed template lessons:`, templateLessons);
       
-      console.log(`copyTemplateToMonth - templateLessons for ${template}:`, templateLessons);
+      if (templateLessons.length > 0) {
+        console.log(`✅ Found ${templateLessons.length} template lessons`);
+      }
       
       if (!templateLessons || templateLessons.length === 0) {
+        console.log(`❌ No template lessons found for ${template}`);
         alert(`No ${template} template lessons found. Please create template lessons first by going to Templates menu and adding lessons to the ${template} template.`);
+        // Refresh template status to reflect current state
+        setTemplatesRefreshKey(prev => prev + 1);
         return;
       }
 
@@ -538,11 +612,9 @@ export default function Calendar({
         }
       }
 
-      console.log('copyTemplateToMonth - templateLessons:', templateLessons);
-      console.log('copyTemplateToMonth - targetWeekdays:', targetWeekdays);
-      console.log('copyTemplateToMonth - daysInMonth:', daysInMonth);
       
       let addedCount = 0;
+      
       for (let d = 1; d <= daysInMonth; d++) {
         const dateObj = new Date(currentYear, monthIndex, d, 12, 0, 0);
         const weekday = dateObj.getDay(); // 0 Sun ... 6 Sat (Sunday-first)
@@ -553,21 +625,23 @@ export default function Calendar({
         const dd = dateObj.getDate().toString().padStart(2, "0");
         const dateStr = `${yyyy}-${mm}-${dd}`;
 
-        console.log(`Processing day ${d}, date: ${dateStr}, weekday: ${weekday}`);
 
         for (const tl of templateLessons) {
+          console.log('Template lesson (tl):', tl);
+          console.log('Date string being assigned:', dateStr);
+          
           // Prevent duplicate same date+time entries
           const duplicate = existingLessons.some(
             (l) => l.date === dateStr && l.time === tl.time
           );
           if (duplicate) {
-            console.log(`Skipping duplicate lesson: ${dateStr} ${tl.time}`);
+            console.log('Skipping duplicate lesson');
             continue;
           }
           
           const newLesson = {
             id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            date: dateStr,
+            date: dateStr, // EXPLICITLY set the date
             time: tl.time,
             subject: tl.subject,
             studentName: tl.studentName,
@@ -575,18 +649,30 @@ export default function Calendar({
             duration: tl.duration || 60,
           };
           
-          console.log('Adding lesson:', newLesson);
+          // FORCE date field multiple times to ensure it's never lost
+          newLesson.date = dateStr;
+          newLesson['date'] = dateStr;
+          Object.defineProperty(newLesson, 'date', { value: dateStr, writable: true, enumerable: true, configurable: true });
+          
+          console.log('Created newLesson from template:', newLesson);
+          console.log('newLesson has date?', !!newLesson.date);
+          console.log('newLesson date value:', newLesson.date);
+          
           existingLessons.push(newLesson);
           addedCount++;
         }
       }
       
-      console.log('copyTemplateToMonth - total addedCount:', addedCount);
+
+      if (addedCount === 0) {
+        alert(`No lessons were added. All ${template} days in ${months[monthIndex]} already have lessons, or no ${template} days exist in this month.`);
+        return;
+      }
 
       // Save to localStorage organized by year
       const lessonsByYear: { [year: string]: Lesson[] } = {};
       existingLessons.forEach(lesson => {
-        const year = lesson.date.split('-')[0];
+        const year = lesson.date ? lesson.date.split('-')[0] : new Date().getFullYear().toString();
         if (!lessonsByYear[year]) {
           lessonsByYear[year] = [];
         }
@@ -594,22 +680,29 @@ export default function Calendar({
       });
       localStorage.setItem("lessons", JSON.stringify(lessonsByYear));
       
-      // Also save to MongoDB using lessonSync
-      try {
-        const { saveLessons } = await import('../lib/lessonSync');
-        await saveLessons(existingLessons);
-        console.log('Successfully saved template lessons to MongoDB');
-      } catch (error) {
-        console.error('Error saving template lessons to MongoDB:', error);
+
+      // Refresh lessons in parent component FIRST
+      if (onLessonsUpdate) {
+        await onLessonsUpdate();
       }
+      
+      // Refresh template status after successful operation
+      setTemplatesRefreshKey(prev => prev + 1);
       
       alert(
         `Added ${addedCount} lessons to ${months[monthIndex]} ${currentYear}.`
       );
-      window.location.reload();
+      
+      // Fallback reload if no callback provided
+      if (!onLessonsUpdate) {
+        window.location.reload();
+      }
     } catch (e) {
       console.error(e);
       alert("Failed to copy template to month.");
+      
+      // Refresh template status even on error to ensure UI is up to date
+      setTemplatesRefreshKey(prev => prev + 1);
     }
   };
 
@@ -655,37 +748,23 @@ export default function Calendar({
                     <p className={styles.expandedSubtitle}>
                       Aya vuraraq günlərə dərs əlavə edin
                     </p>
-                    {(!checkTemplatesExist("odd") && !checkTemplatesExist("even")) && (
-                      <div className={styles.templateInfo}>
+                    {templatesStatus.loaded && (!checkTemplatesExist("odd") && !checkTemplatesExist("even")) && (
+                      <div className={styles.templateInfo} key={templatesRefreshKey}>
                         <small>
                           💡 Templates are empty. Go to Templates menu to create odd/even day templates first.
                         </small>
                       </div>
                     )}
+                    {!templatesStatus.loaded && (
+                      <div className={styles.templateInfo}>
+                        <small>
+                          🔄 Loading templates...
+                        </small>
+                      </div>
+                    )}
                   </div>
                   <div className={styles.headerActions}>
-                    <button
-                      className={styles.templateButton}
-                      onClick={() => copyTemplateToMonth("odd", selectedMonth!)}
-                      title="Apply odd days template to entire month"
-                      disabled={!checkTemplatesExist("odd")}
-                    >
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8M8 11h8m-7 4h6M5 7h.01M5 11h.01M5 15h.01" />
-                      </svg>
-                      Add Odd Template {!checkTemplatesExist("odd") && "(Empty)"}
-                    </button>
-                    <button
-                      className={styles.templateButton}
-                      onClick={() => copyTemplateToMonth("even", selectedMonth!)}
-                      title="Apply even days template to entire month"
-                      disabled={!checkTemplatesExist("even")}
-                    >
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8M8 11h8m-7 4h6M19 7h.01M19 11h.01M19 15h.01" />
-                      </svg>
-                      Add Even Template {!checkTemplatesExist("even") && "(Empty)"}
-                    </button>
+
                     <button
                       className={styles.templateButton}
                       onClick={() => handleTemplateButtonClick("odd")}
@@ -1277,8 +1356,8 @@ export default function Calendar({
                       e.stopPropagation();
                       copyTemplateToMonth("odd", monthIndex);
                     }}
-                    title={checkTemplatesExist("odd") ? "Copy odd days template" : "No odd template found - create template first"}
-                    disabled={!checkTemplatesExist("odd")}
+                    title={!templatesStatus.loaded ? "Loading templates..." : (checkTemplatesExist("odd") ? "Copy odd days template" : "No odd template found - create template first")}
+                    disabled={!templatesStatus.loaded || !checkTemplatesExist("odd")}
                   >
                     <svg
                       className="w-4 h-4"
@@ -1301,8 +1380,8 @@ export default function Calendar({
                       e.stopPropagation();
                       copyTemplateToMonth("even", monthIndex);
                     }}
-                    title={checkTemplatesExist("even") ? "Copy even days template" : "No even template found - create template first"}
-                    disabled={!checkTemplatesExist("even")}
+                    title={!templatesStatus.loaded ? "Loading templates..." : (checkTemplatesExist("even") ? "Copy even days template" : "No even template found - create template first")}
+                    disabled={!templatesStatus.loaded || !checkTemplatesExist("even")}
                   >
                     <svg
                       className="w-4 h-4"
@@ -1369,6 +1448,7 @@ export default function Calendar({
           onClose={() => {
             setIsTemplatesModalOpen(false);
             setTemplateType(null);
+            setTemplatesRefreshKey(prev => prev + 1); // Force refresh template checks
           }}
         />
       )}
