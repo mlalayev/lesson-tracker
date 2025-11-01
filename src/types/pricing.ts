@@ -55,11 +55,20 @@ export const PRICING_CONFIG: SubjectPricing[] = [
     ]
   },
   {
-    subject: 'Math',
+    subject: 'Riyaziyyat',
     tiers: [
       { minStudents: 1, price: 6 },
       { minStudents: 2, price: 8 },
       { minStudents: 3, price: 10 }
+    ]
+  },
+  {
+    subject: 'Session',
+    tiers: [
+      { minStudents: 3, maxStudents: 3, price: 10 },
+      { minStudents: 4, maxStudents: 4, price: 10 },
+      { minStudents: 5, maxStudents: 5, price: 10 },
+      { minStudents: 6, maxStudents: 6, price: 10 }
     ]
   }
 ];
@@ -94,9 +103,10 @@ export function calculatePrice(subject: string, studentCount: number, teacherId?
           let selectedTier = subjectTiers[0]; // Default
           
           for (const tier of subjectTiers) {
-            if (studentCount >= tier.minStudents) {
+            if (studentCount >= tier.minStudents && 
+                (!tier.maxStudents || studentCount <= tier.maxStudents)) {
               selectedTier = tier;
-            } else {
+            } else if (studentCount < tier.minStudents) {
               break;
             }
           }
@@ -130,9 +140,10 @@ export function calculatePrice(subject: string, studentCount: number, teacherId?
   let selectedTier = subjectPricing.tiers[0]; // Default
   
   for (const tier of subjectPricing.tiers) {
-    if (studentCount >= tier.minStudents) {
+    if (studentCount >= tier.minStudents && 
+        (!tier.maxStudents || studentCount <= tier.maxStudents)) {
       selectedTier = tier;
-    } else {
+    } else if (studentCount < tier.minStudents) {
       break;
     }
   }

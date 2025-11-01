@@ -49,7 +49,7 @@ export default function AdminPanel() {
                   const lessonsData = await lessonsResponse.json();
                   const currentDate = new Date();
                   const currentYear = currentDate.getFullYear();
-                  const currentMonth = currentDate.getMonth() + 1;
+                  const currentMonth = currentDate.getMonth() ;
                   
                   // Filter lessons for current month
                   const currentMonthLessons = lessonsData.lessons.filter((lesson: any) => {
@@ -113,7 +113,7 @@ export default function AdminPanel() {
         // Cari ayı avtomatik seç
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
-        const currentMonth = currentDate.getMonth() + 1;
+        const currentMonth = currentDate.getMonth();
         
         // Cari ayın dərslərini tap
         const currentMonthLessons = allLessons.filter((lesson: any) => {
@@ -148,7 +148,7 @@ export default function AdminPanel() {
         // Cari ayı avtomatik seç
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
-        const currentMonth = currentDate.getMonth() + 1;
+        const currentMonth = currentDate.getMonth();
         
         // Cari ayın dərslərini tap
         const currentMonthLessons = allLessons.filter((lesson: any) => {

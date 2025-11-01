@@ -48,6 +48,7 @@ export default function LessonModal({
     'IELTS',
     'Speaking',
     'Kids',
+    'Session',
     'Digər'
   ];
 
@@ -106,7 +107,8 @@ export default function LessonModal({
       alert('Error: Lesson is missing required fields. Please try again.');
       return;
     }
-    
+
+
     onSave(newLesson);
   };
 
